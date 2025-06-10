@@ -11,8 +11,8 @@
 - Активный Zabbix агент на целевых хостах
 
 ## Установка агента
-https://www.zabbix.com/download?zabbix=7.0&os_distribution=debian&os_version=10&components=agent&db=&ws=
-1. Ставим 7.0 (LTS)
+
+1. Ставим агент 7.0 (LTS)
 2. Меняем значения /etc/zabbix/zabbix_agentd.conf
 ```
 Server=
@@ -47,17 +47,13 @@ systemctl restart zabbix-agent
      - `Groups`: Выберите группу хоста (например: "Linux servers")  
      - `Agent interfaces`: Добавьте IP-адрес и порт Zabbix агента (например: `127.0.0.1:10050`)  
 
-2. **Настройка макросов (опционально)**  
-   - В разделе `Macros` можно добавить пользовательские макросы, например:  
-     - `{$CPU.UTIL.CRIT}`: `90`  
-     - `{$MEMORY.UTIL.WARN}`: `80`  
-
 ## Подключение шаблона к хосту
 
 1. **Привязка шаблона**  
    - В форме редактирования хоста перейдите в раздел `Templates`  
    - В поле `Link new templates` начните вводить название шаблона и выберите его из списка  
    - Нажмите `Add` (не забудьте сохранить хост кнопкой `Update`)  
+   - В macros замените значение переменной {$RABBITMQ.API.PASSWORD} на пароль из wsc> inventory service list
 
 2. **Проверка подключения**  
    - Перейдите в `Monitoring` → `Latest data`  
