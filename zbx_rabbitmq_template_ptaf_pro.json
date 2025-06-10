@@ -12,7 +12,7 @@
                 "uuid": "c37740ee2325474a9137095a0f275190",
                 "template": "RabbitMQ node by Zabbix agent for PTAF PRO",
                 "name": "RabbitMQ node by Zabbix agent for PTAF PRO",
-                "description": "Get node metrics from RabbitMQ management plugin provided an HTTP-based API using Zabbix agent.\n\n\u0414\u043b\u044f \u043c\u043e\u043d\u0438\u0442\u043e\u0440\u0438\u043d\u0433\u0430 RabbitMQ \u0432 PTAF PRO\nv1.0",
+                "description": "Get node metrics from RabbitMQ management plugin provided an HTTP-based API using Zabbix agent.\n\n\u0414\u043b\u044f \u043c\u043e\u043d\u0438\u0442\u043e\u0440\u0438\u043d\u0433\u0430 RabbitMQ \u0432 PTAF PRO\nv1.1\n\n\u041f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u043c \u0447\u0442\u043e rabbitMQ \u0437\u0430\u043f\u0443\u0449\u0435\u043d\nrabbitmqctl cluster_status",
                 "groups": [
                     {
                         "name": "Templates/Applications"
@@ -1397,19 +1397,13 @@
                                 },
                                 {
                                     "macro": "{#QUEUE}",
-                                    "value": "{$RABBITMQ.LLD.FILTER.QUEUE.MATCHES}",
+                                    "value": "{$RABBITMQ.PTAF.QUEUE.PREFIX}.*",
                                     "formulaid": "B"
                                 },
                                 {
-                                    "macro": "{#QUEUE}",
-                                    "value": "{$RABBITMQ.LLD.FILTER.QUEUE.NOT_MATCHES}",
-                                    "operator": "NOT_MATCHES_REGEX",
-                                    "formulaid": "C"
-                                },
-                                {
                                     "macro": "{#VHOST}",
-                                    "value": "ptaf",
-                                    "formulaid": "D"
+                                    "value": "{$RABBITMQ.PTAF.VHOST}",
+                                    "formulaid": "C"
                                 }
                             ]
                         },
@@ -1444,6 +1438,34 @@
                                 ]
                             },
                             {
+                                "uuid": "b5ae23b3ca7342bf86b18d55f37e683c",
+                                "name": "[custom] Queue [{#VHOST}][{#QUEUE}]: PTAF Backing Queue Status",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.backing_queue_status[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.backing_queue_status"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
                                 "uuid": "ba57622e8138441a932be565a574a9a7",
                                 "name": "Queue [{#VHOST}][{#QUEUE}]: Consumers",
                                 "type": "DEPENDENT",
@@ -1473,6 +1495,52 @@
                                     {
                                         "tag": "vhost",
                                         "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c5771ff678424a7fa06216b5966f122f",
+                                "name": "[custom] Queue [{#VHOST}][{#QUEUE}]: PTAF Consumer Capacity",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.consumer_capacity[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.consumer_capacity"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "16dcdb8d6bd240888496fee476839ff5",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.queue.consumer_capacity[\"{#VHOST}/{#QUEUE}\"])<0.8",
+                                        "name": "PTAF Queue [{#VHOST}][{#QUEUE}]: Low consumer capacity",
+                                        "priority": "WARNING",
+                                        "tags": [
+                                            {
+                                                "tag": "ptaf",
+                                                "value": "queue"
+                                            }
+                                        ]
                                     }
                                 ]
                             },
@@ -2083,73 +2151,8 @@
                                 ]
                             },
                             {
-                                "uuid": "b5ae23b3ca7342bf86b18d55f37e683c",
-                                "name": "Queue [{#VHOST}][{#QUEUE}]: PTAF Backing Queue Status",
-                                "type": "DEPENDENT",
-                                "key": "rabbitmq.queue.ptaf.backing_queue_status[\"{#VHOST}/{#QUEUE}\"]",
-                                "delay": "0",
-                                "trends": "0",
-                                "preprocessing": [
-                                    {
-                                        "type": "JSONPATH",
-                                        "parameters": [
-                                            "$.backing_queue_status"
-                                        ]
-                                    }
-                                ],
-                                "master_item": {
-                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
-                                },
-                                "tags": [
-                                    {
-                                        "tag": "component",
-                                        "value": "ptaf"
-                                    },
-                                    {
-                                        "tag": "queue",
-                                        "value": "{#QUEUE}"
-                                    },
-                                    {
-                                        "tag": "vhost",
-                                        "value": "{#VHOST}"
-                                    }
-                                ]
-                            },
-                            {
-                                "uuid": "c5771ff678424a7fa06216b5966f122f",
-                                "name": "Queue [{#VHOST}][{#QUEUE}]: PTAF Consumer Capacity",
-                                "type": "DEPENDENT",
-                                "key": "rabbitmq.queue.ptaf.consumer_capacity[\"{#VHOST}/{#QUEUE}\"]",
-                                "delay": "0",
-                                "preprocessing": [
-                                    {
-                                        "type": "JSONPATH",
-                                        "parameters": [
-                                            "$.consumer_capacity"
-                                        ]
-                                    }
-                                ],
-                                "master_item": {
-                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
-                                },
-                                "tags": [
-                                    {
-                                        "tag": "component",
-                                        "value": "ptaf"
-                                    },
-                                    {
-                                        "tag": "queue",
-                                        "value": "{#QUEUE}"
-                                    },
-                                    {
-                                        "tag": "vhost",
-                                        "value": "{#VHOST}"
-                                    }
-                                ]
-                            },
-                            {
                                 "uuid": "375435990c9045e985b7990ca36f367c",
-                                "name": "Queue [{#VHOST}][{#QUEUE}]: PTAF Consumer Utilisation",
+                                "name": "[custom] Queue [{#VHOST}][{#QUEUE}]: PTAF Consumer Utilisation",
                                 "type": "DEPENDENT",
                                 "key": "rabbitmq.queue.ptaf.consumer_utilisation[\"{#VHOST}/{#QUEUE}\"]",
                                 "delay": "0",
@@ -2181,7 +2184,7 @@
                             },
                             {
                                 "uuid": "491e0632e03d4cff8db3103906a9eb1d",
-                                "name": "Queue [{#VHOST}][{#QUEUE}]: PTAF Reductions Rate",
+                                "name": "[custom] Queue [{#VHOST}][{#QUEUE}]: PTAF Reductions Rate",
                                 "type": "DEPENDENT",
                                 "key": "rabbitmq.queue.ptaf.reductions_rate[\"{#VHOST}/{#QUEUE}\"]",
                                 "delay": "0",
@@ -2215,7 +2218,7 @@
                         "trigger_prototypes": [
                             {
                                 "uuid": "d33fa5d0f9544f8f9d03e502e68149bf",
-                                "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.queue.ptaf.consumer_capacity[\"{#VHOST}/{#QUEUE}\"])<0.8 and \nfind(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.queue.consumers[\"{#VHOST}/{#QUEUE}\"],,\"like\",\"ptaf-\")=1",
+                                "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.queue.consumer_capacity[\"{#VHOST}/{#QUEUE}\"])<0.8 and \nfind(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.queue.consumers[\"{#VHOST}/{#QUEUE}\"],,\"like\",\"ptaf-\")=1",
                                 "name": "PTAF Queue [{#VHOST}][{#QUEUE}]: Low consumer capacity",
                                 "priority": "WARNING",
                                 "tags": [
@@ -2240,7 +2243,7 @@
                                         "calc_fnc": "ALL",
                                         "item": {
                                             "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
-                                            "key": "rabbitmq.queue.ptaf.consumer_capacity[\"{#VHOST}/{#QUEUE}\"]"
+                                            "key": "rabbitmq.queue.consumer_capacity[\"{#VHOST}/{#QUEUE}\"]"
                                         }
                                     }
                                 ]
