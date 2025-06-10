@@ -10,6 +10,21 @@
 - Zabbix сервер версии 7.0 и выше
 - Активный Zabbix агент на целевых хостах
 
+## Установка агента
+https://www.zabbix.com/download?zabbix=7.0&os_distribution=debian&os_version=10&components=agent&db=&ws=
+1. Ставим 7.0 (LTS)
+2. Меняем значения /etc/zabbix/zabbix_agentd.conf
+```
+Server=
+ServerActive=
+Hostname=
+```
+3. Перезапускаем сервис
+```
+systemctl restart zabbix-agent
+```
+
+
 ## Установка шаблона
 
 1. **Скачайте файл шаблона**  
