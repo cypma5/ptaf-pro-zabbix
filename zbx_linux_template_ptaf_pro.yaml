@@ -1,0 +1,2171 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 846977d1dfed4968bc5f8bdb363285bc
+      name: 'Templates/Operating systems'
+  templates:
+    - uuid: 6d3f54d0e93f446e94abcc464f761534
+      template: 'Linux by Zabbix agent for PTAF PRO'
+      name: 'Linux by Zabbix agent for PTAF PRO'
+      description: 'This is an unofficial Linux template for PTAF PRO. It requires Zabbix agent 7.0 or newer. Version template 1.0, contact to @KH93b '
+      groups:
+        - name: 'Templates/Operating systems'
+      items:
+        - uuid: fcca68b14fab4956a7fab61d432dc219
+          name: 'Host name of Zabbix agent running'
+          key: agent.hostname
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 18604a04dba049d995e7ee046ff541fd
+          name: 'Zabbix agent ping'
+          key: agent.ping
+          description: 'The agent always returns "1" for this item. May be used in combination with `nodata()` for the availability check.'
+          valuemap:
+            name: 'Zabbix agent ping status'
+          tags:
+            - tag: component
+              value: system
+        - uuid: ba52b33a0e7a48ffb632a7d46bc4268c
+          name: 'Version of Zabbix agent running'
+          key: agent.version
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: application
+        - uuid: 69b569aeeddc40bb9e846353ebf0b8e5
+          name: 'Maximum number of open file descriptors'
+          key: kernel.maxfiles
+          delay: 1h
+          description: 'May be increased by using the `sysctl` utility or modifying the file `/etc/sysctl.conf`.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 3d7586eb24d344e59353f13ef07458c9
+              expression: 'last(/Linux by Zabbix agent for PTAF PRO/kernel.maxfiles)<{$KERNEL.MAXFILES.MIN}'
+              name: 'Linux: Configured max number of open filedescriptors is too low'
+              event_name: 'Linux: Configured max number of open filedescriptors is too low (< {$KERNEL.MAXFILES.MIN})'
+              priority: INFO
+              tags:
+                - tag: scope
+                  value: performance
+        - uuid: 5526d051ba3b4dac9ad506fabd1d65e3
+          name: 'Maximum number of processes'
+          key: kernel.maxproc
+          delay: 1h
+          description: 'May be increased by using the `sysctl` utility or modifying the file `/etc/sysctl.conf`.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 48d71d6bb1fe402e81476b82fd9f063b
+              expression: 'last(/Linux by Zabbix agent for PTAF PRO/kernel.maxproc)<{$KERNEL.MAXPROC.MIN}'
+              name: 'Linux: Configured max number of processes is too low'
+              event_name: 'Linux: Configured max number of processes is too low (< {$KERNEL.MAXPROC.MIN})'
+              priority: INFO
+              dependencies:
+                - name: 'Linux: Getting closer to process limit'
+                  expression: 'last(/Linux by Zabbix agent for PTAF PRO/proc.num)/last(/Linux by Zabbix agent for PTAF PRO/kernel.maxproc)*100>80'
+              tags:
+                - tag: scope
+                  value: performance
+        - uuid: b5a25d599e7e46f1a0e5ce1ef4461155
+          name: 'Number of processes'
+          key: proc.num
+          tags:
+            - tag: component
+              value: system
+        - uuid: 73e748b4eadb4d7ba774c9e778a69ad6
+          name: 'Number of running processes'
+          key: 'proc.num[,,run]'
+          tags:
+            - tag: component
+              value: system
+        - uuid: bd9f19e982994ce9bdda8627ea01ff64
+          name: 'System boot time'
+          key: system.boottime
+          delay: 15m
+          units: unixtime
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 53c4b8d127d14cee87ce394d34af2e83
+          name: 'Interrupts per second'
+          key: system.cpu.intr
+          value_type: FLOAT
+          description: 'Number of interrupts processed.'
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 19c7bfcd8c2847bb9c1224880951df07
+          name: 'Load average (1m avg)'
+          key: 'system.cpu.load[all,avg1]'
+          value_type: FLOAT
+          description: 'Calculated as the system CPU load divided by the number of CPU cores.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 2ca344425d104e5d9a14f2fc8b32d435
+          name: 'Load average (5m avg)'
+          key: 'system.cpu.load[all,avg5]'
+          value_type: FLOAT
+          description: 'Calculated as the system CPU load divided by the number of CPU cores.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 8670d09e74ef4a01844acffd9d3f385a
+          name: 'Load average (15m avg)'
+          key: 'system.cpu.load[all,avg15]'
+          value_type: FLOAT
+          description: 'Calculated as the system CPU load divided by the number of CPU cores.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 72467232856942f28116557ea488b44f
+          name: 'Number of CPUs'
+          key: system.cpu.num
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: ce432ca7209045fab9a97c61c7dbe4d1
+          name: 'Context switches per second'
+          key: system.cpu.switches
+          value_type: FLOAT
+          description: 'The combined rate at which all processors on the computer are switched from one thread to another.'
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 2a3b85ee43574292b159a948c8f0c7db
+          name: 'CPU utilization'
+          type: DEPENDENT
+          key: system.cpu.util
+          delay: '0'
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU utilization expressed in %.'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return (100 - value)'
+          master_item:
+            key: 'system.cpu.util[,idle]'
+          tags:
+            - tag: component
+              value: cpu
+          triggers:
+            - uuid: 1727449e399a43a493cfa8f2878fb3a0
+              expression: 'min(/Linux by Zabbix agent for PTAF PRO/system.cpu.util,5m)>{$CPU.UTIL.CRIT}'
+              name: 'Linux: High CPU utilization'
+              event_name: 'Linux: High CPU utilization (over {$CPU.UTIL.CRIT}% for 5m)'
+              opdata: 'Current utilization: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'CPU utilization is too high. The system might be slow to respond.'
+              dependencies:
+                - name: 'Linux: Load average is too high'
+                  expression: |
+                    min(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg1],5m)/last(/Linux by Zabbix agent for PTAF PRO/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}
+                    and last(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg5])>0
+                    and last(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg15])>0
+              tags:
+                - tag: scope
+                  value: performance
+        - uuid: 319e99e8f64a4f288cebb92b81a1a595
+          name: 'CPU guest time'
+          key: 'system.cpu.util[,guest]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time spent on running a virtual CPU for a guest operating system.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: c21e02e6621d429b8a4d7687b86684e8
+          name: 'CPU guest nice time'
+          key: 'system.cpu.util[,guest_nice]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time spent on running a niced guest (a virtual CPU for guest operating systems under the control of the Linux kernel).'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: c1347c0d9f994ccba1747cac9dedd95c
+          name: 'CPU idle time'
+          key: 'system.cpu.util[,idle]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time the CPU has spent doing nothing.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 845710acffaa4d34a41297467c7dbe07
+          name: 'CPU interrupt time'
+          key: 'system.cpu.util[,interrupt]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time the CPU has spent servicing hardware interrupts.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: d7fcc9d50db442d89df19b4999c0d531
+          name: 'CPU iowait time'
+          key: 'system.cpu.util[,iowait]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time the CPU has been waiting for I/O to complete.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 2a54720dfdcd4721aca18bc98aa4fc6f
+          name: 'CPU nice time'
+          key: 'system.cpu.util[,nice]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time the CPU has spent running users'' processes that have been niced.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 3fc2a780342346158421181bdeadac2a
+          name: 'CPU softirq time'
+          key: 'system.cpu.util[,softirq]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time the CPU has been servicing software interrupts.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 3816269bfdbc4c48bb108cd28239fb7f
+          name: 'CPU steal time'
+          key: 'system.cpu.util[,steal]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The amount of "stolen" CPU from this virtual machine by the hypervisor for other tasks, such as running another virtual machine.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: ea1375bcb89f42b98ccda1ef96eac8e6
+          name: 'CPU system time'
+          key: 'system.cpu.util[,system]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time the CPU has spent running the kernel and its processes.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 09be6e9be72149f8a490c0d70a89e407
+          name: 'CPU user time'
+          key: 'system.cpu.util[,user]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time the CPU has spent running users'' processes that are not niced.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 247838597d8b403095fa91e2d4f2210b
+          name: 'System name'
+          key: system.hostname
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: 'The host name of the system.'
+          inventory_link: NAME
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 79fb3a2e9f554bfdaecfe563db0d2725
+              expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.hostname) and length(last(/Linux by Zabbix agent for PTAF PRO/system.hostname))>0'
+              name: 'Linux: System name has changed'
+              event_name: 'Linux: System name has changed (new name: {ITEM.VALUE})'
+              priority: INFO
+              description: 'The name of the system has changed. Acknowledge to close the problem manually.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+                - tag: scope
+                  value: security
+        - uuid: 0e2eb81d529c46609ba70ac667e2e600
+          name: 'System local time'
+          key: system.localtime
+          units: unixtime
+          description: 'The local system time of the host.'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: acd9cecdabb646a4b9ab0086295a9094
+              expression: 'fuzzytime(/Linux by Zabbix agent for PTAF PRO/system.localtime,{$SYSTEM.FUZZYTIME.MAX})=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'fuzzytime(/Linux by Zabbix agent for PTAF PRO/system.localtime,{$SYSTEM.FUZZYTIME.MIN})=1'
+              name: 'Linux: System time is out of sync'
+              event_name: 'Linux: System time is out of sync (diff with Zabbix server > {$SYSTEM.FUZZYTIME.MAX})'
+              priority: WARNING
+              description: 'The host''s system time is different from Zabbix server time.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 33536950f8f746e4a32ca71636557931
+          name: 'Operating system architecture'
+          key: system.sw.arch
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: 'The architecture of the operating system.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: os
+        - uuid: 7cea8d2800e84de99b4ac0a331cc3259
+          name: 'Operating system'
+          key: system.sw.os
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          inventory_link: OS
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: os
+          triggers:
+            - uuid: 29c5a6f1be6f43ce8c71279c639e4347
+              expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.sw.os) and length(last(/Linux by Zabbix agent for PTAF PRO/system.sw.os))>0'
+              name: 'Linux: Operating system description has changed'
+              priority: INFO
+              description: 'The description of the operating system has changed. Possible reasons are that the system has been updated or replaced. Acknowledge to close the problem manually.'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Linux: System name has changed'
+                  expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.hostname) and length(last(/Linux by Zabbix agent for PTAF PRO/system.hostname))>0'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: ad9df245a4a84343a1f3391a47f0573a
+          name: 'Number of installed packages'
+          key: system.sw.packages.get
+          delay: 1h
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.length()
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: os
+          triggers:
+            - uuid: c01e4b93b898471686098c9982d92386
+              expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.sw.packages.get)<>0'
+              name: 'Linux: Number of installed packages has been changed'
+              priority: WARNING
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 219e816c83c44c83b393137ef6d285cb
+          name: 'Free swap space'
+          key: 'system.swap.size[,free]'
+          units: B
+          description: 'The free space of the swap volume/file expressed in bytes.'
+          tags:
+            - tag: component
+              value: memory
+            - tag: component
+              value: storage
+        - uuid: a0593de9ccdb4e9882bea68455ebe1ee
+          name: 'Free swap space in %'
+          key: 'system.swap.size[,pfree]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The free space of the swap volume/file expressed in %.'
+          tags:
+            - tag: component
+              value: memory
+            - tag: component
+              value: storage
+        - uuid: 157947f955e2415795dbbbbf15a024d1
+          name: 'Total swap space'
+          key: 'system.swap.size[,total]'
+          units: B
+          description: 'The total space of the swap volume/file expressed in bytes.'
+          tags:
+            - tag: component
+              value: memory
+            - tag: component
+              value: storage
+        - uuid: 96d87b26dd324549bc6f1904f899c37d
+          name: 'System description'
+          key: system.uname
+          delay: 15m
+          value_type: CHAR
+          trends: '0'
+          description: 'The information as normally returned by `uname -a`.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 9c9ddd6d1ba044f7bcb38f27558e851a
+          name: 'System uptime'
+          key: system.uptime
+          delay: 30s
+          trends: '0'
+          units: uptime
+          description: 'The system uptime expressed in the following format: "N days, hh:mm:ss".'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 025660f51afc4e5a98a34e2812ce6486
+              expression: 'last(/Linux by Zabbix agent for PTAF PRO/system.uptime)<10m'
+              name: 'Linux: {HOST.NAME} has been restarted'
+              event_name: 'Linux: {HOST.NAME} has been restarted (uptime < 10m)'
+              priority: WARNING
+              description: 'The host uptime is less than 10 minutes.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: b505a30ffa714b918ee24e456ac7150e
+          name: 'Number of logged in users'
+          key: system.users.num
+          description: 'The number of users who are currently logged in.'
+          tags:
+            - tag: component
+              value: environment
+        - uuid: a69c496e48084aeda6a390a919ea85cf
+          name: 'Checksum of /etc/passwd'
+          key: 'vfs.file.cksum[/etc/passwd,sha256]'
+          delay: 15m
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: security
+          triggers:
+            - uuid: ece5e7c7e213486887d1ef78c1244c10
+              expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.cksum[/etc/passwd,sha256],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.cksum[/etc/passwd,sha256],#2)'
+              name: 'Linux: /etc/passwd has been changed'
+              priority: INFO
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Linux: Operating system description has changed'
+                  expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.sw.os) and length(last(/Linux by Zabbix agent for PTAF PRO/system.sw.os))>0'
+                - name: 'Linux: System name has changed'
+                  expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.hostname) and length(last(/Linux by Zabbix agent for PTAF PRO/system.hostname))>0'
+              tags:
+                - tag: scope
+                  value: security
+        - uuid: 3c3eb419dc634937b381c5db504f7c14
+          name: 'Get filesystems'
+          key: vfs.fs.get
+          history: '0'
+          value_type: TEXT
+          trends: '0'
+          description: 'The `vfs.fs.get` key acquires raw information set about the filesystems. Later to be extracted by preprocessing in dependent items.'
+          tags:
+            - tag: component
+              value: raw
+        - uuid: 1026db11a4d0465c893b8bb2587b251f
+          name: 'Free space on /boot (MB)'
+          key: 'vfs.fs.size[/boot,free]'
+          delay: 5m
+          units: MB
+        - uuid: c88a967759ea416c870242e002f29c33
+          name: 'Used space on /boot (MB)'
+          key: 'vfs.fs.size[/boot,used]'
+          delay: 5m
+          units: MB
+        - uuid: a4d07e1e49c34f40b27691dbff03dc38
+          name: 'Free disk space on /var/lib'
+          key: 'vfs.fs.size[/var/lib,pfree]'
+          delay: 5m
+          units: '%'
+          triggers:
+            - uuid: 162f1b7491b14070b332322622a2c828
+              expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.size[/var/lib,pfree])<25'
+              name: 'Low free space on /var/lib (< 25%)'
+              priority: DISASTER
+            - uuid: fc5de5a69ae5454ebae1800c8241b666
+              expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.size[/var/lib,pfree])<30'
+              name: 'Low free space on /var/lib (< 30%)'
+              priority: HIGH
+            - uuid: d0d856496c554e11ba07d1b4e4a927e3
+              expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.size[/var/lib,pfree])<35'
+              name: 'Low free space on /var/lib (< 35%)'
+              priority: AVERAGE
+        - uuid: 849e24fc94984839af2d2080d121b4be
+          name: 'Available memory'
+          key: 'vm.memory.size[available]'
+          units: B
+          description: |
+            The available memory:
+            - in Linux = free + buffers + cache;
+            - on other platforms calculation may vary.
+            
+            See also Appendixes in Zabbix Documentation about parameters of the `vm.memory.size` item.
+          tags:
+            - tag: component
+              value: memory
+        - uuid: cec1f0ef7dcd4daca802af0db9e4461a
+          name: 'Available memory in %'
+          key: 'vm.memory.size[pavailable]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The available memory as percentage of the total. See also Appendixes in Zabbix Documentation about parameters of the `vm.memory.size` item.'
+          tags:
+            - tag: component
+              value: memory
+        - uuid: 8ee4452d47f847aa947e373e2fa45896
+          name: 'Total memory'
+          key: 'vm.memory.size[total]'
+          units: B
+          description: 'Total memory expressed in bytes.'
+          tags:
+            - tag: component
+              value: memory
+        - uuid: ef504dc4595b4908be903c45a1994070
+          name: 'Memory utilization'
+          type: DEPENDENT
+          key: vm.memory.utilization
+          delay: '0'
+          value_type: FLOAT
+          units: '%'
+          description: 'The percentage of used memory is calculated as `100-pavailable`.'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return (100-value);'
+          master_item:
+            key: 'vm.memory.size[pavailable]'
+          tags:
+            - tag: component
+              value: memory
+          triggers:
+            - uuid: b5bdbf97b852411db7ae8e5e39b218e9
+              expression: 'min(/Linux by Zabbix agent for PTAF PRO/vm.memory.utilization,5m)>{$MEMORY.UTIL.MAX}'
+              name: 'Linux: High memory utilization'
+              event_name: 'Linux: High memory utilization (>{$MEMORY.UTIL.MAX}% for 5m)'
+              priority: AVERAGE
+              description: 'The system is running out of free memory.'
+              dependencies:
+                - name: 'Linux: Lack of available memory'
+                  expression: 'max(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[available],5m)<{$MEMORY.AVAILABLE.MIN} and last(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[total])>0'
+              tags:
+                - tag: scope
+                  value: capacity
+                - tag: scope
+                  value: performance
+        - uuid: 3512243d83334f0db248ae49005be147
+          name: 'Zabbix agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,agent,available]'
+          description: 'Used for monitoring the availability status of the agent.'
+          valuemap:
+            name: zabbix.host.available
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 59f5e4274fc5420caa3520a4a0db22eb
+              expression: 'max(/Linux by Zabbix agent for PTAF PRO/zabbix[host,agent,available],{$AGENT.TIMEOUT})=0'
+              name: 'Linux: Zabbix agent is not available'
+              event_name: 'Linux: Zabbix agent is not available (for {$AGENT.TIMEOUT})'
+              priority: AVERAGE
+              description: 'For passive agents only, host availability is used with `{$AGENT.TIMEOUT}` as a time threshold.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+      discovery_rules:
+        - uuid: 8e7f65434a534c2db6c73cda1fa28ac4
+          name: 'Network interface discovery'
+          key: net.if.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#IFNAME}'
+                value: '^(eth|en|lo|bond|br|tun|tap|vnet)([0-9]|-)+((\.[0-9]+)|\w+)?$'
+                formulaid: A
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          description: 'The discovery of network interfaces.'
+          item_prototypes:
+            - uuid: 9567e6b9a1ad4075bbe72e56179831f3
+              name: 'Interface {#IFNAME}: Inbound packets discarded'
+              key: 'net.if.in["{#IFNAME}",dropped]'
+              delay: 3m
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 0a8484e32f2547f3acc1a53fc2480434
+              name: 'Interface {#IFNAME}: Inbound packets with errors'
+              key: 'net.if.in["{#IFNAME}",errors]'
+              delay: 3m
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: dee8168172084e289c444c8ddd136795
+              name: 'Interface {#IFNAME}: Bits received'
+              key: 'net.if.in["{#IFNAME}"]'
+              delay: 3m
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 88ef7387bd8b47d587470e4d2f24634c
+              name: 'Interface {#IFNAME}: Outbound packets discarded'
+              key: 'net.if.out["{#IFNAME}",dropped]'
+              delay: 3m
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: af85e090c20b451b90251c6f9553ccc6
+              name: 'Interface {#IFNAME}: Outbound packets with errors'
+              key: 'net.if.out["{#IFNAME}",errors]'
+              delay: 3m
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: e3fb0e06e69b474eb1b3edd80e2fa66f
+              name: 'Interface {#IFNAME}: Bits sent'
+              key: 'net.if.out["{#IFNAME}"]'
+              delay: 3m
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 868accd34fe645179849997a376fd7c9
+              name: 'Interface {#IFNAME}: Operational status'
+              key: 'vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"]'
+              trends: '0'
+              description: 'Reference: https://www.kernel.org/doc/Documentation/networking/operstates.txt'
+              valuemap:
+                name: ifOperStatus
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var newvalue;
+                      switch(value) {
+                        case "unknown":
+                      	newvalue = 0;
+                      	break;
+                        case "notpresent":
+                      	newvalue = 1;
+                      	break;
+                        case "down":
+                      	newvalue = 2;
+                      	break;
+                        case "lowerlayerdown":
+                      	newvalue = 3;
+                      	break;
+                        case "testing":
+                      	newvalue = 4;
+                      	break;
+                        case "dormant":
+                      	newvalue = 5;
+                      	break;
+                        case "up":
+                      	newvalue = 6;
+                      	break;  default:
+                      	newvalue = "Problem parsing interface operstate in JS";
+                      }
+                      return newvalue;
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+              trigger_prototypes:
+                - uuid: 0afefd21fc784495a0208304afef1485
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+                  name: 'Linux: Interface {#IFNAME}: Link down'
+                  opdata: 'Current state: {ITEM.LASTVALUE1}'
+                  priority: AVERAGE
+                  description: |
+                    This trigger expression works as follows:
+                    1. It can be triggered if the operations status is down.
+                    2. `{$IFCONTROL:"{#IFNAME}"}=1` - a user can redefine the context macro to "0", marking this interface as not important. No new trigger will be fired if this interface is down.
+                    3. `last(/TEMPLATE_NAME/METRIC,#1)<>last(/TEMPLATE_NAME/METRIC,#2)` - the trigger fires only if the operational status was up to (1) sometime before (so, does not fire for "eternal off" interfaces.)
+                    
+                    WARNING: if closed manually - it will not fire again on the next poll, because of .diff.
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: e3285ea08abe4a1eaf5582b1468412c0
+              name: 'Interface {#IFNAME}: Speed'
+              key: 'vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]'
+              delay: 5m
+              trends: '0'
+              units: bps
+              description: |
+                It indicates the latest or current speed value of the interface. The value is an integer representing the link speed expressed in bits/sec.
+                This attribute is only valid for the interfaces that implement the ethtool `get_link_ksettings` method (mostly Ethernet).
+                
+                Reference: https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-net
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000000'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 760f787d4f5046539e3649527efe25bb
+              name: 'Interface {#IFNAME}: Interface type'
+              key: 'vfs.file.contents["/sys/class/net/{#IFNAME}/type"]'
+              delay: 1h
+              trends: '0'
+              description: |
+                It indicates the interface protocol type as a decimal value.
+                See `include/uapi/linux/if_arp.h` for all possible values.
+                Reference: https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-net
+              valuemap:
+                name: 'Linux::Interface protocol types'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+          trigger_prototypes:
+            - uuid: 8338912719c44859a488ccd8e1b68231
+              expression: |
+                change(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])<0 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0
+                and
+                (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/type"])=6 or last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/type"])=1)
+                and
+                (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2)
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                (change(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"],#2)>0) or
+                (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2)
+              name: 'Linux: Interface {#IFNAME}: Ethernet has changed to lower speed than it was before'
+              opdata: 'Current reported speed: {ITEM.LASTVALUE1}'
+              priority: INFO
+              description: 'This Ethernet connection has transitioned down from its known maximum speed. This might be a sign of autonegotiation issues. Acknowledge to close the problem manually.'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Linux: Interface {#IFNAME}: Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+              tags:
+                - tag: scope
+                  value: performance
+            - uuid: 3b0b0761d43f4a7d8fa9222833d6da67
+              expression: |
+                (avg(/Linux by Zabbix agent for PTAF PRO/net.if.in["{#IFNAME}"],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]) or
+                avg(/Linux by Zabbix agent for PTAF PRO/net.if.out["{#IFNAME}"],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])) and
+                last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                avg(/Linux by Zabbix agent for PTAF PRO/net.if.in["{#IFNAME}"],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]) and
+                avg(/Linux by Zabbix agent for PTAF PRO/net.if.out["{#IFNAME}"],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])
+              name: 'Linux: Interface {#IFNAME}: High bandwidth usage'
+              event_name: 'Linux: Interface {#IFNAME}: High bandwidth usage (>{$IF.UTIL.MAX:"{#IFNAME}"}%)'
+              opdata: 'In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              description: 'The utilization of the network interface is close to its estimated maximum bandwidth.'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Linux: Interface {#IFNAME}: Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+              tags:
+                - tag: scope
+                  value: performance
+            - uuid: bb46de5e7d674feabd77fabd3918e608
+              expression: |
+                min(/Linux by Zabbix agent for PTAF PRO/net.if.in["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+                or min(/Linux by Zabbix agent for PTAF PRO/net.if.out["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                max(/Linux by Zabbix agent for PTAF PRO/net.if.in["{#IFNAME}",errors],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+                and max(/Linux by Zabbix agent for PTAF PRO/net.if.out["{#IFNAME}",errors],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+              name: 'Linux: Interface {#IFNAME}: High error rate'
+              event_name: 'Linux: Interface {#IFNAME}: High error rate (>{$IF.ERRORS.WARN:"{#IFNAME}"} for 5m)'
+              opdata: 'errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              description: 'It recovers when it is below 80% of the `{$IF.ERRORS.WARN:"{#IFNAME}"}` threshold.'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Linux: Interface {#IFNAME}: Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+          graph_prototypes:
+            - uuid: f80c9d07865946e981953ebe521bf5e6
+              name: 'Interface {#IFNAME}: Network traffic'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: 199C0D
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'net.if.in["{#IFNAME}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: F63100
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'net.if.out["{#IFNAME}"]'
+                - sortorder: '2'
+                  color: 00611C
+                  yaxisside: RIGHT
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'net.if.out["{#IFNAME}",errors]'
+                - sortorder: '3'
+                  color: F7941D
+                  yaxisside: RIGHT
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'net.if.in["{#IFNAME}",errors]'
+                - sortorder: '4'
+                  color: FC6EA3
+                  yaxisside: RIGHT
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'net.if.out["{#IFNAME}",dropped]'
+                - sortorder: '5'
+                  color: 6C59DC
+                  yaxisside: RIGHT
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'net.if.in["{#IFNAME}",dropped]'
+        - uuid: 68c4736365c742c48c31eb97b20e30fb
+          name: 'Block devices discovery'
+          key: vfs.dev.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#DEVNAME}'
+                value: '{$VFS.DEV.DEVNAME.MATCHES}'
+                formulaid: A
+              - macro: '{#DEVNAME}'
+                value: '{$VFS.DEV.DEVNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#DEVTYPE}'
+                value: disk
+                formulaid: C
+          item_prototypes:
+            - uuid: 3abcbc72cb264f9786c1f43325aee31d
+              name: '{#DEVNAME}: Disk average queue size (avgqu-sz)'
+              type: DEPENDENT
+              key: 'vfs.dev.queue_size[{#DEVNAME}]'
+              delay: '0'
+              value_type: FLOAT
+              description: 'The current average disk queue; the number of requests outstanding on the disk while the performance data is being collected.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[10]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 281ed7492737464286b8f7633ae963af
+              name: '{#DEVNAME}: Disk read request avg waiting time (r_await)'
+              type: CALCULATED
+              key: 'vfs.dev.read.await[{#DEVNAME}]'
+              value_type: FLOAT
+              units: '!ms'
+              params: '(last(//vfs.dev.read.time.rate[{#DEVNAME}])/(last(//vfs.dev.read.rate[{#DEVNAME}])+(last(//vfs.dev.read.rate[{#DEVNAME}])=0)))*1000*(last(//vfs.dev.read.rate[{#DEVNAME}]) > 0)'
+              description: 'This formula contains two Boolean expressions that evaluate to 1 or 0 in order to set the calculated metric to zero and to avoid the exception - division by zero.'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 096dbbe8595346e2b42f27b9cc3499cb
+              name: '{#DEVNAME}: Disk read rate'
+              type: DEPENDENT
+              key: 'vfs.dev.read.rate[{#DEVNAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!r/s'
+              description: 'r/s (read operations per second) - the number (after merges) of read requests completed per second for the device.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[0]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: fcc58dffa76141ccb1c2942af2b5a0c7
+              name: '{#DEVNAME}: Disk read time (rate)'
+              type: DEPENDENT
+              key: 'vfs.dev.read.time.rate[{#DEVNAME}]'
+              delay: '0'
+              value_type: FLOAT
+              description: 'The rate of total read time counter; used in `r_await` calculation.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[3]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: a3f5cd83d7d2473d840917b45ad14772
+              name: '{#DEVNAME}: Disk utilization'
+              type: DEPENDENT
+              key: 'vfs.dev.util[{#DEVNAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              description: 'The percentage of elapsed time during which the selected disk drive was busy while servicing read or write requests.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[9]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: e458a164482d424193b15939c17b8fc7
+              name: '{#DEVNAME}: Disk write request avg waiting time (w_await)'
+              type: CALCULATED
+              key: 'vfs.dev.write.await[{#DEVNAME}]'
+              value_type: FLOAT
+              units: '!ms'
+              params: '(last(//vfs.dev.write.time.rate[{#DEVNAME}])/(last(//vfs.dev.write.rate[{#DEVNAME}])+(last(//vfs.dev.write.rate[{#DEVNAME}])=0)))*1000*(last(//vfs.dev.write.rate[{#DEVNAME}]) > 0)'
+              description: 'This formula contains two Boolean expressions that evaluate to 1 or 0 in order to set the calculated metric to zero and to avoid the exception - division by zero.'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 375b0307c76d4096b704d037af96e16b
+              name: '{#DEVNAME}: Disk write rate'
+              type: DEPENDENT
+              key: 'vfs.dev.write.rate[{#DEVNAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!w/s'
+              description: 'w/s (write operations per second) - the number (after merges) of write requests completed per second for the device.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[4]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 59066fb97daf4bc9b46155b05f68bb27
+              name: '{#DEVNAME}: Disk write time (rate)'
+              type: DEPENDENT
+              key: 'vfs.dev.write.time.rate[{#DEVNAME}]'
+              delay: '0'
+              value_type: FLOAT
+              description: 'The rate of total write time counter; used in `w_await` calculation.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[7]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 04636889439b43d1aff533a83ad25973
+              name: '{#DEVNAME}: Get stats'
+              key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              history: '0'
+              value_type: TEXT
+              trends: '0'
+              description: 'The contents of get `/sys/block/{#DEVNAME}/stat` to get the disk statistics.'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return JSON.stringify(value.trim().split(/ +/));'
+              tags:
+                - tag: component
+                  value: raw
+          trigger_prototypes:
+            - uuid: 2565e7945fa2487b936520d773d10a18
+              expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.dev.read.await[{#DEVNAME}],15m) > {$VFS.DEV.READ.AWAIT.WARN:"{#DEVNAME}"} or min(/Linux by Zabbix agent for PTAF PRO/vfs.dev.write.await[{#DEVNAME}],15m) > {$VFS.DEV.WRITE.AWAIT.WARN:"{#DEVNAME}"}'
+              name: 'Linux: {#DEVNAME}: Disk read/write request responses are too high'
+              event_name: 'Linux: {#DEVNAME}: Disk read/write request responses are too high (read > {$VFS.DEV.READ.AWAIT.WARN:"{#DEVNAME}"} ms for 15m or write > {$VFS.DEV.WRITE.AWAIT.WARN:"{#DEVNAME}"} ms for 15m)'
+              priority: WARNING
+              description: 'This trigger might indicate the disk `{#DEVNAME}` saturation.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: performance
+          graph_prototypes:
+            - uuid: b9920cdff3624816971fd2ecf5310b61
+              name: '{#DEVNAME}: Disk average waiting time'
+              graph_items:
+                - color: 199C0D
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.dev.read.await[{#DEVNAME}]'
+                - sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: F63100
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.dev.write.await[{#DEVNAME}]'
+            - uuid: 2e2c1e7f0c21499083485caa0078c78a
+              name: '{#DEVNAME}: Disk read/write rates'
+              graph_items:
+                - color: 199C0D
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.dev.read.rate[{#DEVNAME}]'
+                - sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: F63100
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.dev.write.rate[{#DEVNAME}]'
+            - uuid: aca4270f6ca3474f9ca1b32ebddaca6e
+              name: '{#DEVNAME}: Disk utilization and queue'
+              graph_items:
+                - color: 199C0D
+                  yaxisside: RIGHT
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.dev.queue_size[{#DEVNAME}]'
+                - sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: F63100
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.dev.util[{#DEVNAME}]'
+        - uuid: 3d7055850d044d1c8022af7d81273db4
+          name: 'Mounted filesystem discovery'
+          type: DEPENDENT
+          key: vfs.fs.dependent.discovery
+          delay: '0'
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.MATCHES}'
+                formulaid: A
+              - macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.MATCHES}'
+                formulaid: C
+              - macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: D
+          description: 'The discovery of mounted filesystems with different types.'
+          item_prototypes:
+            - uuid: dd41043229a443a5b8c5bca3af509273
+              name: 'FS [{#FSNAME}]: Inodes: Free, in %'
+              type: DEPENDENT
+              key: 'vfs.fs.dependent.inode[{#FSNAME},pfree]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              description: 'Free metadata space expressed in %.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.inodes.pfree
+              master_item:
+                key: 'vfs.fs.dependent[{#FSNAME},data]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+                - tag: fstype
+                  value: '{#FSTYPE}'
+              trigger_prototypes:
+                - uuid: 19cd76a38eca478bb27b8c0208397516
+                  expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
+                  name: 'Linux: FS [{#FSNAME}]: Running out of free inodes'
+                  event_name: 'Linux: {#FSNAME}: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}%)'
+                  opdata: 'Free inodes: {ITEM.LASTVALUE1}'
+                  priority: AVERAGE
+                  description: 'Disk writing may fail if index nodes are exhausted, leading to error messages like "No space left on device" or "Disk is full", despite available free space.'
+                  tags:
+                    - tag: scope
+                      value: capacity
+                    - tag: scope
+                      value: performance
+                - uuid: 8d9b645f07fd4695a918b3e7868916da
+                  expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}'
+                  name: 'Linux: FS [{#FSNAME}]: Running out of free inodes'
+                  event_name: 'Linux: FS [{#FSNAME}]: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}%)'
+                  opdata: 'Free inodes: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: 'Disk writing may fail if index nodes are exhausted, leading to error messages like "No space left on device" or "Disk is full", despite available free space.'
+                  dependencies:
+                    - name: 'Linux: FS [{#FSNAME}]: Running out of free inodes'
+                      expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
+                  tags:
+                    - tag: scope
+                      value: capacity
+                    - tag: scope
+                      value: performance
+            - uuid: 742272feab4042ea970905aae0390612
+              name: 'FS [{#FSNAME}]: Space: Available'
+              type: DEPENDENT
+              key: 'vfs.fs.dependent.size[{#FSNAME},free]'
+              delay: '0'
+              units: B
+              description: 'Available storage space expressed in bytes.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.bytes.free
+              master_item:
+                key: 'vfs.fs.dependent[{#FSNAME},data]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+                - tag: fstype
+                  value: '{#FSTYPE}'
+            - uuid: fc57b711e408409c9a26d40b23016ff2
+              name: 'FS [{#FSNAME}]: Space: Used, in %'
+              type: DEPENDENT
+              key: 'vfs.fs.dependent.size[{#FSNAME},pused]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              description: 'Calculated as the percentage of currently used space compared to the maximum available space.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.bytes.pused
+              master_item:
+                key: 'vfs.fs.dependent[{#FSNAME},data]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+                - tag: fstype
+                  value: '{#FSTYPE}'
+              trigger_prototypes:
+                - uuid: 7230e5ff180746e79c3b04f16761c422
+                  expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}'
+                  name: 'Linux: FS [{#FSNAME}]: Space is critically low'
+                  event_name: 'Linux: FS [{#FSNAME}]: Space is critically low (used > {$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}%, total {{?last(//vfs.fs.dependent.size[{#FSNAME},total])/1024/1024/1024}.fmtnum(1)}GB)'
+                  opdata: 'Space used: {{ITEM.LASTVALUE1}.fmtnum(1)}%'
+                  priority: AVERAGE
+                  description: |
+                    The volume's space usage exceeds the `{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}%` limit.
+                    The trigger expression is based on the current used and maximum available spaces.
+                    Event name represents the total volume space, which can differ from the maximum available space, depending on the filesystem type.
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: capacity
+                - uuid: 6f78af7f73104e4285f939b533dfc7a9
+                  expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}'
+                  name: 'Linux: FS [{#FSNAME}]: Space is low'
+                  event_name: 'Linux: FS [{#FSNAME}]: Space is low (used > {$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}%, total {{?last(//vfs.fs.dependent.size[{#FSNAME},total])/1024/1024/1024}.fmtnum(1)}GB)'
+                  opdata: 'Space used: {{ITEM.LASTVALUE1}.fmtnum(1)}%'
+                  priority: WARNING
+                  description: |
+                    The volume's space usage exceeds the `{$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}%` limit.
+                    The trigger expression is based on the current used and maximum available spaces.
+                    Event name represents the total volume space, which can differ from the maximum available space, depending on the filesystem type.
+                  manual_close: 'YES'
+                  dependencies:
+                    - name: 'Linux: FS [{#FSNAME}]: Space is critically low'
+                      expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}'
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: capacity
+            - uuid: a2af715c11814785b4ff2bea56f4f3dc
+              name: 'FS [{#FSNAME}]: Space: Total'
+              type: DEPENDENT
+              key: 'vfs.fs.dependent.size[{#FSNAME},total]'
+              delay: '0'
+              units: B
+              description: 'Total space expressed in bytes.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.bytes.total
+              master_item:
+                key: 'vfs.fs.dependent[{#FSNAME},data]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+                - tag: fstype
+                  value: '{#FSTYPE}'
+            - uuid: 43f409388a9f4ea795395eac8a8d88a2
+              name: 'FS [{#FSNAME}]: Space: Used'
+              type: DEPENDENT
+              key: 'vfs.fs.dependent.size[{#FSNAME},used]'
+              delay: '0'
+              units: B
+              description: 'Used storage expressed in bytes.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.bytes.used
+              master_item:
+                key: 'vfs.fs.dependent[{#FSNAME},data]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+                - tag: fstype
+                  value: '{#FSTYPE}'
+            - uuid: 3a3ad2ef6e61401790aae21bc2315f66
+              name: 'FS [{#FSNAME}]: Get data'
+              type: DEPENDENT
+              key: 'vfs.fs.dependent[{#FSNAME},data]'
+              delay: '0'
+              history: 1h
+              value_type: TEXT
+              trends: '0'
+              description: 'Intermediate data of `{#FSNAME}` filesystem.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.[?(@.fsname==''{#FSNAME}'')].first()'
+              master_item:
+                key: vfs.fs.get
+              tags:
+                - tag: component
+                  value: raw
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+                - tag: fstype
+                  value: '{#FSTYPE}'
+            - uuid: efadc6237cef428ca63164fd7e713076
+              name: 'FS [{#FSNAME}]: Option: Read-only'
+              type: DEPENDENT
+              key: 'vfs.fs.dependent[{#FSNAME},readonly]'
+              delay: '0'
+              description: 'The filesystem is mounted as read-only. It is available only for Zabbix agents 6.4 and higher.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.options
+                  error_handler: DISCARD_VALUE
+                - type: REGEX
+                  parameters:
+                    - '(?:^|,)ro\b'
+                    - '1'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              master_item:
+                key: 'vfs.fs.dependent[{#FSNAME},data]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+                - tag: fstype
+                  value: '{#FSTYPE}'
+              trigger_prototypes:
+                - uuid: edc661dc5be740f6877ff7fc638c01ce
+                  expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent[{#FSNAME},readonly],#2)=0 and last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent[{#FSNAME},readonly])=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent[{#FSNAME},readonly])=0'
+                  name: 'Linux: FS [{#FSNAME}]: Filesystem has become read-only'
+                  priority: AVERAGE
+                  description: 'The filesystem has become read-only, possibly due to an I/O error. Available only for Zabbix agents 6.4 and higher.'
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+          graph_prototypes:
+            - uuid: 02ba8ab70f48440996378911c492afea
+              name: 'FS [{#FSTYPE}({#FSNAME})]: Space usage graph, in % (relative to max available)'
+              width: '600'
+              height: '340'
+              ymin_type_1: FIXED
+              ymax_type_1: FIXED
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: F63100
+                  calc_fnc: ALL
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.fs.dependent.size[{#FSNAME},pused]'
+            - uuid: b8e787f850e24f5f88d1c93f3c49ca11
+              name: 'FS [{#FSTYPE}({#FSNAME})]: Space utilization chart (relative to total)'
+              width: '600'
+              height: '340'
+              type: PIE
+              show_3d: 'YES'
+              graph_items:
+                - color: '787878'
+                  calc_fnc: LAST
+                  type: GRAPH_SUM
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.fs.dependent.size[{#FSNAME},total]'
+                - sortorder: '1'
+                  color: F63100
+                  calc_fnc: LAST
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.fs.dependent.size[{#FSNAME},used]'
+                - sortorder: '2'
+                  color: 199C09
+                  calc_fnc: LAST
+                  item:
+                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    key: 'vfs.fs.dependent.size[{#FSNAME},free]'
+          master_item:
+            key: vfs.fs.get
+          lld_macro_paths:
+            - lld_macro: '{#FSNAME}'
+              path: $.fsname
+            - lld_macro: '{#FSTYPE}'
+              path: $.fstype
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var filesystems = JSON.parse(value);
+                  
+                  result = filesystems.map(function (filesystem) {
+                  	return {
+                  		'fsname': filesystem.fsname,
+                  		'fstype': filesystem.fstype
+                  	};
+                  });
+                  
+                  return JSON.stringify(result);
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          overrides:
+            - name: 'Skip metadata collection for dynamic FS'
+              step: '1'
+              filter:
+                conditions:
+                  - macro: '{#FSTYPE}'
+                    value: ^(btrfs|zfs)$
+                    formulaid: A
+              operations:
+                - operationobject: ITEM_PROTOTYPE
+                  operator: LIKE
+                  value: Inodes
+                  discover: NO_DISCOVER
+      tags:
+        - tag: class
+          value: os
+        - tag: ptaf
+        - tag: target
+          value: linux
+      macros:
+        - macro: '{$AGENT.TIMEOUT}'
+          value: 3m
+          description: 'Timeout after which agent is considered unavailable. Works only for agents reachable from Zabbix server/proxy (passive mode).'
+        - macro: '{$CPU.UTIL.CRIT}'
+          value: '90'
+          description: 'Critical threshold of CPU utilization expressed in %.'
+        - macro: '{$IF.ERRORS.WARN}'
+          value: '2'
+          description: 'Warning threshold of error packet rate. Can be used with interface name as context.'
+        - macro: '{$IF.UTIL.MAX}'
+          value: '90'
+          description: 'Used as a threshold in the interface utilization trigger.'
+        - macro: '{$IFCONTROL}'
+          value: '1'
+          description: 'Link status trigger will be fired only for interfaces where the context macro equals "1".'
+        - macro: '{$KERNEL.MAXFILES.MIN}'
+          value: '256'
+        - macro: '{$KERNEL.MAXPROC.MIN}'
+          value: '1024'
+        - macro: '{$LOAD_AVG_PER_CPU.MAX.WARN}'
+          value: '1.5'
+          description: 'The CPU load per core is considered sustainable. If necessary, it can be tuned.'
+        - macro: '{$MEMORY.AVAILABLE.MIN}'
+          value: 20M
+          description: 'Used as a threshold in the available memory trigger.'
+        - macro: '{$MEMORY.UTIL.MAX}'
+          value: '90'
+          description: 'Used as a threshold in the memory utilization trigger.'
+        - macro: '{$NET.IF.IFNAME.MATCHES}'
+          value: '^.*$'
+          description: 'Used for network interface discovery. Can be overridden on the host or linked template level.'
+        - macro: '{$NET.IF.IFNAME.NOT_MATCHES}'
+          value: '(^Software Loopback Interface|^NULL[0-9.]*$|^[Ll]o[0-9.]*$|^[Ss]ystem$|^Nu[0-9.]*$|^veth[0-9A-z]+$|docker[0-9]+|br-[a-z0-9]{12})'
+          description: 'Filters out `loopbacks`, `nulls`, docker `veth` links and `docker0` bridge by default.'
+        - macro: '{$SWAP.PFREE.MIN.WARN}'
+          value: '50'
+          description: 'The warning threshold of the minimum free swap.'
+        - macro: '{$SYSTEM.FUZZYTIME.MAX}'
+          value: 60s
+          description: 'The upper threshold for difference of system time.'
+        - macro: '{$SYSTEM.FUZZYTIME.MIN}'
+          value: 10s
+          description: 'The lower threshold for difference of system time. Used in recovery expression to avoid trigger flapping.'
+        - macro: '{$VFS.DEV.DEVNAME.MATCHES}'
+          value: .+
+          description: 'Used for block device discovery. Can be overridden on the host or linked template level.'
+        - macro: '{$VFS.DEV.DEVNAME.NOT_MATCHES}'
+          value: '^(loop[0-9]*|sd[a-z][0-9]+|nbd[0-9]+|sr[0-9]+|fd[0-9]+|dm-[0-9]+|ram[0-9]+|ploop[a-z0-9]+|md[0-9]*|hcp[0-9]*|zram[0-9]*)'
+          description: 'Used for block device discovery. Can be overridden on the host or linked template level.'
+        - macro: '{$VFS.DEV.READ.AWAIT.WARN}'
+          value: '20'
+          description: 'The average response time (in ms) of disk read before the trigger fires.'
+        - macro: '{$VFS.DEV.WRITE.AWAIT.WARN}'
+          value: '20'
+          description: 'The average response time (in ms) of disk write before the trigger fires.'
+        - macro: '{$VFS.FS.FSNAME.MATCHES}'
+          value: .+
+          description: 'Used for filesystem discovery. Can be overridden on the host or linked template level.'
+        - macro: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+          value: ^(/dev|/sys|/run|/proc|.+/shm$)
+          description: 'Used for filesystem discovery. Can be overridden on the host or linked template level.'
+        - macro: '{$VFS.FS.FSTYPE.MATCHES}'
+          value: ^(btrfs|ext2|ext3|ext4|reiser|xfs|ffs|ufs|jfs|jfs2|vxfs|hfs|apfs|refs|ntfs|fat32|zfs)$
+          description: 'Used for filesystem discovery. Can be overridden on the host or linked template level.'
+        - macro: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+          value: ^\s$
+          description: 'Used for filesystem discovery. Can be overridden on the host or linked template level.'
+        - macro: '{$VFS.FS.INODE.PFREE.MIN.CRIT}'
+          value: '10'
+          description: 'The critical threshold of the filesystem metadata utilization.'
+        - macro: '{$VFS.FS.INODE.PFREE.MIN.WARN}'
+          value: '20'
+          description: 'The warning threshold of the filesystem metadata utilization.'
+        - macro: '{$VFS.FS.PUSED.MAX.CRIT}'
+          value: '90'
+          description: 'The critical threshold of the filesystem utilization.'
+        - macro: '{$VFS.FS.PUSED.MAX.WARN}'
+          value: '80'
+          description: 'The warning threshold of the filesystem utilization.'
+      dashboards:
+        - uuid: a05024b8c13d4e1f9335d061f07a89c0
+          name: Filesystems
+          pages:
+            - name: Overview
+              widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '3'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: 'FS [{#FSTYPE}({#FSNAME})]: Space utilization chart (relative to total)'
+                    - type: STRING
+                      name: reference
+                      value: AAAEB
+                - type: graphprototype
+                  'y': '5'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: 'FS [{#FSTYPE}({#FSNAME})]: Space usage graph, in % (relative to max available)'
+                    - type: STRING
+                      name: reference
+                      value: AAAEC
+        - uuid: 55b231b1ea8943b8b3a5f17b4b6ca31e
+          name: 'Network interfaces'
+          pages:
+            - name: Overview
+              widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: 'Interface {#IFNAME}: Network traffic'
+                    - type: STRING
+                      name: reference
+                      value: AAAAJ
+        - uuid: 385788f75a84483d883357e497aedc24
+          name: 'System performance'
+          pages:
+            - widgets:
+                - type: graph
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: 'Linux: System load'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                - type: graph
+                  'y': '5'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: 'Linux: Memory usage'
+                    - type: STRING
+                      name: reference
+                      value: AAAAC
+                - type: graphprototype
+                  'y': '10'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '3'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: 'FS [{#FSTYPE}({#FSNAME})]: Space utilization chart (relative to total)'
+                    - type: STRING
+                      name: reference
+                      value: AAAEA
+                - type: graphprototype
+                  'y': '15'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: '{#DEVNAME}: Disk read/write rates'
+                    - type: STRING
+                      name: reference
+                      value: AAAAF
+                - type: graphprototype
+                  'y': '20'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: '{#DEVNAME}: Disk average waiting time'
+                    - type: STRING
+                      name: reference
+                      value: AAAAG
+                - type: graphprototype
+                  'y': '25'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: '{#DEVNAME}: Disk utilization and queue'
+                    - type: STRING
+                      name: reference
+                      value: AAAAH
+                - type: graphprototype
+                  'y': '30'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: 'Interface {#IFNAME}: Network traffic'
+                    - type: STRING
+                      name: reference
+                      value: AAAAI
+                - type: graph
+                  x: '36'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: 'Linux: CPU usage'
+                    - type: STRING
+                      name: reference
+                      value: AAAAB
+                - type: graph
+                  x: '36'
+                  'y': '5'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        name: 'Linux: Swap usage'
+                    - type: STRING
+                      name: reference
+                      value: AAAAD
+      valuemaps:
+        - uuid: 0536fdfb80e74aeaa8c9dcea30304436
+          name: ifOperStatus
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: notpresent
+            - value: '2'
+              newvalue: down
+            - value: '3'
+              newvalue: lowerlayerdown
+            - value: '4'
+              newvalue: testing
+            - value: '5'
+              newvalue: dormant
+            - value: '6'
+              newvalue: up
+        - uuid: c30692714bd049cead28c3a987954722
+          name: 'Linux::Interface protocol types'
+          mappings:
+            - value: '0'
+              newvalue: 'from KA9Q: NET/ROM pseudo'
+            - value: '1'
+              newvalue: Ethernet
+            - value: '2'
+              newvalue: 'Experimental Ethernet'
+            - value: '3'
+              newvalue: 'AX.25 Level 2'
+            - value: '4'
+              newvalue: 'PROnet token ring'
+            - value: '5'
+              newvalue: Chaosnet
+            - value: '6'
+              newvalue: 'IEEE 802.2 Ethernet/TR/TB'
+            - value: '7'
+              newvalue: ARCnet
+            - value: '8'
+              newvalue: APPLEtalk
+            - value: '15'
+              newvalue: 'Frame Relay DLCI'
+            - value: '19'
+              newvalue: ATM
+            - value: '23'
+              newvalue: 'Metricom STRIP (new IANA id)'
+            - value: '24'
+              newvalue: 'IEEE 1394 IPv4 - RFC 2734'
+            - value: '27'
+              newvalue: EUI-64
+            - value: '32'
+              newvalue: InfiniBand
+            - value: '256'
+              newvalue: ARPHRD_SLIP
+            - value: '257'
+              newvalue: ARPHRD_CSLIP
+            - value: '258'
+              newvalue: ARPHRD_SLIP6
+            - value: '259'
+              newvalue: ARPHRD_CSLIP6
+            - value: '260'
+              newvalue: 'Notional KISS type'
+            - value: '264'
+              newvalue: ARPHRD_ADAPT
+            - value: '270'
+              newvalue: ARPHRD_ROSE
+            - value: '271'
+              newvalue: 'CCITT X.25'
+            - value: '272'
+              newvalue: 'Boards with X.25 in firmware'
+            - value: '280'
+              newvalue: 'Controller Area Network'
+            - value: '512'
+              newvalue: ARPHRD_PPP
+            - value: '513'
+              newvalue: 'Cisco HDLC'
+            - value: '516'
+              newvalue: LAPB
+            - value: '517'
+              newvalue: 'Digital''s DDCMP protocol'
+            - value: '518'
+              newvalue: 'Raw HDLC'
+            - value: '519'
+              newvalue: 'Raw IP'
+            - value: '768'
+              newvalue: 'IPIP tunnel'
+            - value: '769'
+              newvalue: 'IP6IP6 tunnel'
+            - value: '770'
+              newvalue: 'Frame Relay Access Device'
+            - value: '771'
+              newvalue: 'SKIP vif'
+            - value: '772'
+              newvalue: 'Loopback device'
+            - value: '773'
+              newvalue: 'Localtalk device'
+            - value: '774'
+              newvalue: 'Fiber Distributed Data Interface'
+            - value: '775'
+              newvalue: 'AP1000 BIF'
+            - value: '776'
+              newvalue: 'sit0 device - IPv6-in-IPv4'
+            - value: '777'
+              newvalue: 'IP over DDP tunneller'
+            - value: '778'
+              newvalue: 'GRE over IP'
+            - value: '779'
+              newvalue: 'PIMSM register interface'
+            - value: '780'
+              newvalue: 'High Performance Parallel Interface'
+            - value: '781'
+              newvalue: 'Nexus 64Mbps Ash'
+            - value: '782'
+              newvalue: 'Acorn Econet'
+            - value: '783'
+              newvalue: Linux-IrDA
+            - value: '784'
+              newvalue: 'Point to point fibrechannel'
+            - value: '785'
+              newvalue: 'Fibrechannel arbitrated loop'
+            - value: '786'
+              newvalue: 'Fibrechannel public loop'
+            - value: '787'
+              newvalue: 'Fibrechannel fabric'
+            - value: '800'
+              newvalue: 'Magic type ident for TR'
+            - value: '801'
+              newvalue: 'IEEE 802.11'
+            - value: '802'
+              newvalue: 'IEEE 802.11 + Prism2 header'
+            - value: '803'
+              newvalue: 'IEEE 802.11 + radiotap header'
+            - value: '804'
+              newvalue: ARPHRD_IEEE802154
+            - value: '805'
+              newvalue: 'IEEE 802.15.4 network monitor'
+            - value: '820'
+              newvalue: 'PhoNet media type'
+            - value: '821'
+              newvalue: 'PhoNet pipe header'
+            - value: '822'
+              newvalue: 'CAIF media type'
+            - value: '823'
+              newvalue: 'GRE over IPv6'
+            - value: '824'
+              newvalue: 'Netlink header'
+            - value: '825'
+              newvalue: 'IPv6 over LoWPAN'
+            - value: '826'
+              newvalue: 'Vsock monitor header'
+        - uuid: 794b3b787368450dab3eb9cbdbb2395b
+          name: zabbix.host.available
+          mappings:
+            - value: '0'
+              newvalue: 'not available'
+            - value: '1'
+              newvalue: available
+            - value: '2'
+              newvalue: unknown
+        - uuid: fa0f6807dbc34e4782aeb38d737af178
+          name: 'Zabbix agent ping status'
+          mappings:
+            - value: '1'
+              newvalue: Up
+  triggers:
+    - uuid: 173cf92c484248a6a01d7afe8dc70d32
+      expression: 'last(/Linux by Zabbix agent for PTAF PRO/proc.num)/last(/Linux by Zabbix agent for PTAF PRO/kernel.maxproc)*100>80'
+      name: 'Linux: Getting closer to process limit'
+      event_name: 'Linux: Getting closer to process limit (over 80% used)'
+      opdata: '{ITEM.LASTVALUE1} active, {ITEM.LASTVALUE2} limit.'
+      priority: WARNING
+      tags:
+        - tag: scope
+          value: performance
+    - uuid: 1e8ff96248a448eca67e2c5f87804cad
+      expression: 'max(/Linux by Zabbix agent for PTAF PRO/system.swap.size[,pfree],5m)<{$SWAP.PFREE.MIN.WARN} and last(/Linux by Zabbix agent for PTAF PRO/system.swap.size[,total])>0'
+      name: 'Linux: High swap space usage'
+      event_name: 'Linux: High swap space usage (less than {$SWAP.PFREE.MIN.WARN}% free)'
+      opdata: 'Free: {ITEM.LASTVALUE1}, total: {ITEM.LASTVALUE2}'
+      priority: WARNING
+      description: 'If there is no swap configured, this trigger is ignored.'
+      dependencies:
+        - name: 'Linux: High memory utilization'
+          expression: 'min(/Linux by Zabbix agent for PTAF PRO/vm.memory.utilization,5m)>{$MEMORY.UTIL.MAX}'
+        - name: 'Linux: Lack of available memory'
+          expression: 'max(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[available],5m)<{$MEMORY.AVAILABLE.MIN} and last(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[total])>0'
+      tags:
+        - tag: scope
+          value: capacity
+    - uuid: 63a2010b379e49cd86e16490d88e8039
+      expression: 'max(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[available],5m)<{$MEMORY.AVAILABLE.MIN} and last(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[total])>0'
+      name: 'Linux: Lack of available memory'
+      event_name: 'Linux: Lack of available memory (<{$MEMORY.AVAILABLE.MIN} of {ITEM.VALUE2})'
+      opdata: 'Available: {ITEM.LASTVALUE1}, total: {ITEM.LASTVALUE2}'
+      priority: AVERAGE
+      description: 'The system is running out of memory.'
+      tags:
+        - tag: scope
+          value: capacity
+        - tag: scope
+          value: performance
+    - uuid: 2176583d672f416d8aa4bc0bf8990b59
+      expression: |
+        min(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg1],5m)/last(/Linux by Zabbix agent for PTAF PRO/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}
+        and last(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg5])>0
+        and last(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg15])>0
+      name: 'Linux: Load average is too high'
+      event_name: 'Linux: Load average is too high (per CPU load over {$LOAD_AVG_PER_CPU.MAX.WARN} for 5m)'
+      opdata: 'Load averages(1m 5m 15m): ({ITEM.LASTVALUE1} {ITEM.LASTVALUE3} {ITEM.LASTVALUE4}), # of CPUs: {ITEM.LASTVALUE2}'
+      priority: AVERAGE
+      description: 'The load average per CPU is too high. The system may be slow to respond.'
+      tags:
+        - tag: scope
+          value: capacity
+        - tag: scope
+          value: performance
+  graphs:
+    - uuid: d84b1a9d99fb4c838ffeb01ce23cb204
+      name: 'Linux: CPU jumps'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: system.cpu.switches
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: system.cpu.intr
+    - uuid: 5204ab18fcb5473bb99d4cb6f6eb34de
+      name: 'Linux: CPU usage'
+      type: STACKED
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.util[,system]'
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.util[,user]'
+        - sortorder: '2'
+          color: 00611C
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.util[,nice]'
+        - sortorder: '3'
+          color: F7941D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.util[,iowait]'
+        - sortorder: '4'
+          color: FC6EA3
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.util[,steal]'
+        - sortorder: '5'
+          color: 6C59DC
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.util[,interrupt]'
+        - sortorder: '6'
+          color: C7A72D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.util[,softirq]'
+        - sortorder: '7'
+          color: BA2A5D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.util[,guest]'
+        - sortorder: '8'
+          color: F230E0
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.util[,guest_nice]'
+    - uuid: 695e0b8ad18c4ab7bbd6ab0cc5a013cb
+      name: 'Linux: CPU utilization'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        - drawtype: GRADIENT_LINE
+          color: 199C0D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: system.cpu.util
+    - uuid: 789332929232465280a8d721e5af1646
+      name: 'Linux: Memory usage'
+      ymin_type_1: FIXED
+      graph_items:
+        - drawtype: BOLD_LINE
+          color: 199C0D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'vm.memory.size[total]'
+        - sortorder: '1'
+          drawtype: GRADIENT_LINE
+          color: F63100
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'vm.memory.size[available]'
+    - uuid: b58783627b334de996801b372cd8ac5a
+      name: 'Linux: Memory utilization'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        - drawtype: GRADIENT_LINE
+          color: 199C0D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: vm.memory.utilization
+    - uuid: cc3675837c3a4d3f987739aa715199a2
+      name: 'Linux: Processes'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: proc.num
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'proc.num[,,run]'
+    - uuid: 764e556eed864c86a5e528a2b0faa370
+      name: 'Linux: Swap usage'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.swap.size[,free]'
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.swap.size[,total]'
+    - uuid: dc3e064522224ef3a42f40b3f520940b
+      name: 'Linux: System load'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.load[all,avg1]'
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.load[all,avg5]'
+        - sortorder: '2'
+          color: 00611C
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: 'system.cpu.load[all,avg15]'
+        - sortorder: '3'
+          color: F7941D
+          yaxisside: RIGHT
+          item:
+            host: 'Linux by Zabbix agent for PTAF PRO'
+            key: system.cpu.num

@@ -1,0 +1,2806 @@
+{
+    "zabbix_export": {
+        "version": "7.0",
+        "template_groups": [
+            {
+                "uuid": "a571c0d144b14fd4a87a9d9b2aa9fcd6",
+                "name": "Templates/Applications"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "c37740ee2325474a9137095a0f275190",
+                "template": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                "name": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                "description": "Get node metrics from RabbitMQ management plugin provided an HTTP-based API using Zabbix agent.\n\n\u0414\u043b\u044f \u043c\u043e\u043d\u0438\u0442\u043e\u0440\u0438\u043d\u0433\u0430 RabbitMQ \u0432 PTAF PRO\nv1.1\n\n\u041f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u043c \u0447\u0442\u043e rabbitMQ \u0437\u0430\u043f\u0443\u0449\u0435\u043d\nrabbitmqctl cluster_status",
+                "groups": [
+                    {
+                        "name": "Templates/Applications"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "23656c867a19411c94f222db52672a26",
+                        "name": "RabbitMQ Service response time",
+                        "key": "net.tcp.service.perf[\"{$RABBITMQ.API.SCHEME}\",\"{$RABBITMQ.API.HOST}\",\"{$RABBITMQ.API.PORT}\"]",
+                        "value_type": "FLOAT",
+                        "units": "s",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "9e2a9985fbef48e29a61be78f0cdfab7",
+                        "name": "RabbitMQ Service ping",
+                        "key": "net.tcp.service[\"{$RABBITMQ.API.SCHEME}\",\"{$RABBITMQ.API.HOST}\",\"{$RABBITMQ.API.PORT}\"]",
+                        "valuemap": {
+                            "name": "Service state"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "10m"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "health"
+                            },
+                            {
+                                "tag": "component",
+                                "value": "network"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "4ae838912539446bb2ec85161603621d",
+                        "name": "Get processes summary",
+                        "key": "proc.get[{$RABBITMQ.PROCESS.NAME.PARAMETER},,,summary]",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "description": "The aggregated data of summary metrics for all processes.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "73bc58e541ab4d3ba49d4bf0013becf2",
+                        "name": "Free disk space",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.disk_free",
+                        "delay": "0",
+                        "units": "B",
+                        "description": "The current free disk space.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.disk_free"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "storage"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "77b2d71a70ee4a18a6756f62c4eb1cf4",
+                        "name": "Disk free alarm",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.disk_free_alarm",
+                        "delay": "0",
+                        "description": "It checks whether the node has a disk alarm or not.",
+                        "valuemap": {
+                            "name": "Alarm state"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.disk_free_alarm"
+                                ]
+                            },
+                            {
+                                "type": "BOOL_TO_DECIMAL",
+                                "parameters": [
+                                    ""
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "storage"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "9d312ec73eb44d4aa16d0b732f482af4",
+                                "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.node.disk_free_alarm)=1",
+                                "name": "RabbitMQ node: Free disk space alarm",
+                                "event_name": "RabbitMQ node: Free disk space alarm (Free space threshold has been reached)",
+                                "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                "priority": "AVERAGE",
+                                "description": "For more details see [Free Disk Space Alarms](https://www.rabbitmq.com/disk-alarms.html).",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "performance"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "6e11b2a9203d4feca53e2084d3efade0",
+                        "name": "Disk free limit",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.disk_free_limit",
+                        "delay": "0",
+                        "units": "B",
+                        "description": "The free space limit of a disk expressed in bytes.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.disk_free_limit"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "storage"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "070cbb9dae6f482a951cafed4a69758f",
+                        "name": "Used file descriptors",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.fd_used",
+                        "delay": "0",
+                        "description": "The descriptors of the used file.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.fd_used"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "storage"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "ce3aefa3b80a412bb906b8b790afbf17",
+                        "name": "Memory alarm",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.mem_alarm",
+                        "delay": "0",
+                        "description": "It checks whether the host has a memory alarm or not.",
+                        "valuemap": {
+                            "name": "Alarm state"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.mem_alarm"
+                                ]
+                            },
+                            {
+                                "type": "BOOL_TO_DECIMAL",
+                                "parameters": [
+                                    ""
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "memory"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "3e25d2f782814c3a936c9d49b260379d",
+                                "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.node.mem_alarm)=1",
+                                "name": "RabbitMQ node: Memory alarm",
+                                "event_name": "RabbitMQ node: Memory alarm (Memory usage threshold has been reached)",
+                                "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                "priority": "AVERAGE",
+                                "description": "For more details see [Memory Alarms](https://www.rabbitmq.com/memory.html).",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "performance"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "096d736ed23b4f57a6a215e6fcf0b18a",
+                        "name": "Memory limit",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.mem_limit",
+                        "delay": "0",
+                        "units": "B",
+                        "description": "The memory usage with high watermark properties expressed in bytes.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.mem_limit"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "memory"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "a125562644434962b85ad49a909ae7a0",
+                        "name": "Memory used",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.mem_used",
+                        "delay": "0",
+                        "units": "B",
+                        "description": "The memory usage expressed in bytes.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.mem_used"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "memory"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "a7aacd6b13f84bb3abed3dfe5d19aebf",
+                        "name": "RabbitMQ Management plugin version",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.overview.management_version",
+                        "delay": "0",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "description": "The version of the management plugin in use.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.management_version"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/overview\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "99a1bd0810e1413bb103da7fc888d6da",
+                        "name": "RabbitMQ version",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.overview.rabbitmq_version",
+                        "delay": "0",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "description": "The version of the RabbitMQ on the node, which processed this request.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.rabbitmq_version"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/overview\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "b5c1494aa5fe41eca3ae51d1667a9b2b",
+                                "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.node.overview.rabbitmq_version,#1)<>last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.node.overview.rabbitmq_version,#2) and length(last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.node.overview.rabbitmq_version))>0",
+                                "name": "RabbitMQ node: Version has changed",
+                                "event_name": "RabbitMQ node: Version has changed (new version: {ITEM.VALUE})",
+                                "priority": "INFO",
+                                "description": "RabbitMQ version has changed. Acknowledge to close the problem manually.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "36863f8eb4f74db4bb42b74cd4ff2ddc",
+                        "name": "Number of network partitions",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.partitions",
+                        "delay": "0",
+                        "description": "The number of network partitions, which this node \"sees\".",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.partitions"
+                                ]
+                            },
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "return JSON.parse(value).length;"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "network"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "4483890f5bc64bf0bc2ccd2d7d16211e",
+                                "expression": "min(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.node.partitions,5m)>0",
+                                "name": "RabbitMQ node: Number of network partitions is too high",
+                                "event_name": "RabbitMQ node: Number of network partitions is too high (more than 0 for 5m)",
+                                "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                "priority": "WARNING",
+                                "description": "For more details see [Detecting Network Partitions](https://www.rabbitmq.com/partitions.html#detecting).",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "performance"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "7a1dfa4b46ca45bcb05cfd10f80153c0",
+                        "name": "Is running",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.running",
+                        "delay": "0",
+                        "description": "It \"sees\" whether the node is running or not.",
+                        "valuemap": {
+                            "name": "Service state"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.running"
+                                ]
+                            },
+                            {
+                                "type": "BOOL_TO_DECIMAL",
+                                "parameters": [
+                                    ""
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "8e8606b498114ecfbd941a14c393060e",
+                        "name": "Runtime run queue",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.run_queue",
+                        "delay": "0",
+                        "description": "The average number of Erlang processes waiting to run.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.run_queue"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "4fad072c1366417c9f940c2bb430dff9",
+                        "name": "Sockets available",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.sockets_total",
+                        "delay": "0",
+                        "description": "The file descriptors available for use as sockets.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.sockets_total"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "9e163eaf44134f3e8b8ce6660785e0e6",
+                        "name": "Sockets used",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.sockets_used",
+                        "delay": "0",
+                        "description": "The number of file descriptors used as sockets.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.sockets_used"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "9db88ae5543f40f3bdc98217aa40f41f",
+                        "name": "Uptime",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.node.uptime",
+                        "delay": "0",
+                        "value_type": "FLOAT",
+                        "units": "s",
+                        "description": "Uptime expressed in milliseconds.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.uptime"
+                                ]
+                            },
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "0.001"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "c5afd7e0d31544c5aef0b8e8a7d7897e",
+                                "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.node.uptime)<10m",
+                                "name": "RabbitMQ node: Host has been restarted",
+                                "event_name": "RabbitMQ node: {HOST.NAME} has been restarted (uptime < 10m)",
+                                "priority": "INFO",
+                                "description": "Uptime is less than 10 minutes.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "8f0f7f84b59242f4843e929f6c7f9ff5",
+                        "name": "Get nodes",
+                        "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"]",
+                        "history": "1h",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "description": "The HTTP API endpoint that returns metrics of the nodes.",
+                        "preprocessing": [
+                            {
+                                "type": "REGEX",
+                                "parameters": [
+                                    "\\n\\s?\\n(.*)",
+                                    "\\1"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "62c1e509e1cb4f2f961d076a8233874b",
+                        "name": "Get node overview",
+                        "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/overview\"]",
+                        "history": "1h",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "description": "The HTTP API endpoint that returns cluster-wide metrics.",
+                        "preprocessing": [
+                            {
+                                "type": "REGEX",
+                                "parameters": [
+                                    "\\n\\s?\\n(.*)",
+                                    "\\1"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "0d8dab796b0a4471a430c614ad19a833",
+                        "name": "Get queues",
+                        "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/queues\"]",
+                        "history": "1h",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "description": "The HTTP API endpoint that returns metrics of the queues metrics.",
+                        "preprocessing": [
+                            {
+                                "type": "REGEX",
+                                "parameters": [
+                                    "\\n\\s?\\n(.*)",
+                                    "\\1"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "5e5daf0092744c8fa0b38a5f714fb710",
+                        "name": "Health Check 3.8.9- discovery",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.healthcheck.v389.discovery",
+                        "delay": "0",
+                        "description": "Specific metrics for the versions: up to and including 3.8.4.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "2db39321adfb433f960e7ea329dbd057",
+                                "name": "Healthcheck{#SINGLETON}",
+                                "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/healthchecks/node{#SINGLETON}\"]",
+                                "description": "It checks whether the RabbitMQ application is running; and whether the channels and queues can be listed successfully; and that no alarms are in effect.",
+                                "valuemap": {
+                                    "name": "RabbitMQ healthcheck"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "REGEX",
+                                        "parameters": [
+                                            "\\n\\s?\\n(.*)",
+                                            "\\1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.status"
+                                        ]
+                                    },
+                                    {
+                                        "type": "BOOL_TO_DECIMAL",
+                                        "parameters": [
+                                            ""
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "health"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "system"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "ab68de2dca7f4d0fa96e9ff2f24b7576",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/healthchecks/node{#SINGLETON}\"])=0",
+                                        "name": "RabbitMQ node: Node healthcheck failed",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "For more details see [Health Checks](https://www.rabbitmq.com/monitoring.html#health-checks).",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/overview\"]"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.management_version"
+                                ]
+                            },
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var rabbit_version = parseInt(value.split('.')[0]) * 10000 +\n\tparseInt(value.split('.')[1]) * 100 +\n\tparseInt(value.split('.')[2]);\nreturn JSON.stringify(rabbit_version < 30810 ? [{ '{#SINGLETON}': '' }] : []);"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "60421c07f11641fd8b794685d6f736de",
+                        "name": "Health Check 3.8.10+ discovery",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.healthcheck.v3810.discovery",
+                        "delay": "0",
+                        "description": "Specific metrics for the versions: up to and including 3.8.10.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "56752abbd94e4eb39285a4ec489781f4",
+                                "name": "RabbitMQ Healthcheck: expiration date on the certificates{#SINGLETON}",
+                                "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/certificate-expiration/1/months{#SINGLETON}\"]",
+                                "description": "It checks the expiration date on the certificates for every listener configured to use the Transport Layer Security (TLS).\nIt responds with a status code `200 OK` if all the certificates are valid (have not expired).\nOtherwise, it responds with a status code `503 Service Unavailable`.",
+                                "valuemap": {
+                                    "name": "RabbitMQ healthcheck"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "REGEX",
+                                        "parameters": [
+                                            "HTTP\\/1\\.1\\b\\s(\\d+)",
+                                            "\\1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "switch(value){\ncase '200': return 1\ncase '503': return 0\ndefault: 2}"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "3h"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "certificate"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "health"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "14510dc0894e4c80b0ffb1b992f3e70c",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/certificate-expiration/1/months{#SINGLETON}\"])=0",
+                                        "name": "RabbitMQ node: There are valid TLS certificates expiring in the next month",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "It checks if there are valid TLS certificates expiring in the next month. This is the default API endpoint path: http://{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/index.html.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "notice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "3b787266e998485fac1e55c658f537bf",
+                                "name": "Healthcheck: local alarms in effect on this node{#SINGLETON}",
+                                "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/local-alarms{#SINGLETON}\"]",
+                                "description": "It responds with a status code `200 OK` if there are no local alarms in effect on the target node.\nOtherwise, it responds with a status code `503 Service Unavailable`.",
+                                "valuemap": {
+                                    "name": "RabbitMQ healthcheck"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "REGEX",
+                                        "parameters": [
+                                            "HTTP\\/1\\.1\\b\\s(\\d+)",
+                                            "\\1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "switch(value){\ncase '200': return 1\ncase '503': return 0\ndefault: 2}"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "3h"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "health"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "system"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "96af269461c245e7bf789155e9c0b9f8",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/local-alarms{#SINGLETON}\"])=0",
+                                        "name": "RabbitMQ node: There are active alarms in the node",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "It checks the active alarms in the nodes via API. This is the default API endpoint path: http://{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/index.html.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "notice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "f3d92d79dbb74fb99c09e7c43d40e1e7",
+                                "name": "RabbitMQ Healthcheck: classic mirrored queues without synchronized mirrors online{#SINGLETON}",
+                                "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/node-is-mirror-sync-critical{#SINGLETON}\"]",
+                                "description": "It checks if there are classic mirrored queues without synchronized mirrors online (queues that would potentially lose data if the target node is shut down).\nIt responds with a status code `200 OK` if there are no such classic mirrored queues.\nOtherwise, it responds with a status code `503 Service Unavailable`.",
+                                "valuemap": {
+                                    "name": "RabbitMQ healthcheck"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "REGEX",
+                                        "parameters": [
+                                            "HTTP\\/1\\.1\\b\\s(\\d+)",
+                                            "\\1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "switch(value){\ncase '200': return 1\ncase '503': return 0\ndefault: 2}"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "3h"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "health"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "queues"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "fb56855a80f64a3092c6bd0ba724bd5e",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/node-is-mirror-sync-critical{#SINGLETON}\"])=0",
+                                        "name": "RabbitMQ node: There are queues that could potentially lose data if this node goes offline.",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "It checks whether there are queues that could potentially lose data if this node goes offline via API. This is the default API endpoint path: http://{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/index.html.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "notice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ea154e826c3649b693b46801faa4c2a8",
+                                "name": "RabbitMQ Healthcheck: queues with minimum online quorum{#SINGLETON}",
+                                "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/node-is-quorum-critical{#SINGLETON}\"]",
+                                "description": "It checks if there are quorum queues with minimum online quorum (queues that would lose their quorum and availability if the target node is shut down).\nIt responds with a status code `200 OK` if there are no such quorum queues.\nOtherwise, it responds with a status code `503 Service Unavailable`.",
+                                "valuemap": {
+                                    "name": "RabbitMQ healthcheck"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "REGEX",
+                                        "parameters": [
+                                            "HTTP\\/1\\.1\\b\\s(\\d+)",
+                                            "\\1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "switch(value){\ncase '200': return 1\ncase '503': return 0\ndefault: 2}"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "3h"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "health"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "queues"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "ce63dc32856e462c8fd511d62ff86533",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/node-is-quorum-critical{#SINGLETON}\"])=0",
+                                        "name": "RabbitMQ node: There are queues that would lose their quorum and availability if this node is shut down.",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "It checks if there are queues that could potentially lose data if this node goes offline via API. This is the default API endpoint path: http://{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/index.html.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "notice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "247bee202acf430086e92691cc773134",
+                                "name": "Healthcheck: virtual hosts on this node{#SINGLETON}",
+                                "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/virtual-hosts{#SINGLETON}\"]",
+                                "description": "It responds with It responds with a status code `200 OK` if all virtual hosts are running on the target node.\nOtherwise it responds with a status code `503 Service Unavailable`.",
+                                "valuemap": {
+                                    "name": "RabbitMQ healthcheck"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "REGEX",
+                                        "parameters": [
+                                            "HTTP\\/1\\.1\\b\\s(\\d+)",
+                                            "\\1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "switch(value){\ncase '200': return 1\ncase '503': return 0\ndefault: 2}"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "3h"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "health"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "system"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "a65ec3d7cea44221860fd1d315017cd6",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/health/checks/virtual-hosts{#SINGLETON}\"])=0",
+                                        "name": "RabbitMQ node: There are not running virtual hosts",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "It checks if there are not running virtual hosts via API. This is the default API endpoint path: http://{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/index.html.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "notice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/overview\"]"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.management_version"
+                                ]
+                            },
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var rabbit_version = parseInt(value.split('.')[0]) * 10000 +\n\tparseInt(value.split('.')[1]) * 100 +\n\tparseInt(value.split('.')[2]);\nreturn JSON.stringify(rabbit_version >= 30810 ? [{ '{#SINGLETON}': '' }] : []);"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "a48d457fa7694823819a366feff0aa51",
+                        "name": "RabbitMQ process discovery",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.proc.discovery",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#RABBITMQ.NAME}",
+                                    "value": "{$RABBITMQ.PROCESS_NAME}",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "description": "The discovery of the RabbitMQ summary processes.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "b43f0fdf59bb4a2f8f52f8a9154f2554",
+                                "name": "CPU utilization",
+                                "key": "proc.cpu.util[{#RABBITMQ.NAME}]",
+                                "value_type": "FLOAT",
+                                "units": "%",
+                                "description": "The percentage of the CPU utilization by a process {#RABBITMQ.NAME}.",
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "cpu"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "fef22b59e0214be58a201b056edc8fc9",
+                                "name": "Get process data",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.proc.get[{#RABBITMQ.NAME}]",
+                                "delay": "0",
+                                "history": "0",
+                                "value_type": "TEXT",
+                                "trends": "0",
+                                "description": "The summary metrics aggregated by a process {#RABBITMQ.NAME}.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.[?(@[\"name\"]==\"{#RABBITMQ.NAME}\")].first()"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "Failed to retrieve process {#RABBITMQ.NAME} data"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "proc.get[{$RABBITMQ.PROCESS.NAME.PARAMETER},,,summary]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "raw"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "419139eef8554569a54bbe4a334a2fc0",
+                                "name": "Number of running processes",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.proc.num[{#RABBITMQ.NAME}]",
+                                "delay": "0",
+                                "description": "The number of running processes {#RABBITMQ.NAME}.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.processes"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.proc.get[{#RABBITMQ.NAME}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "system"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "b90401b68ab344dd907128de25ed40a6",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.proc.num[{#RABBITMQ.NAME}])=0",
+                                        "name": "RabbitMQ node: Process is not running",
+                                        "priority": "HIGH",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "aeb67d0d500246499b72feb41fc99ed1",
+                                "name": "Memory usage, %",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.proc.pmem[{#RABBITMQ.NAME}]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "units": "%",
+                                "description": "The percentage of real memory used by a process {#RABBITMQ.NAME}.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.pmem"
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.proc.get[{#RABBITMQ.NAME}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e8422cbd4f124677adc5ea38cad79e1c",
+                                "name": "Memory usage (rss)",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.proc.rss[{#RABBITMQ.NAME}]",
+                                "delay": "0",
+                                "units": "B",
+                                "description": "The summary of resident set size memory used by a process {#RABBITMQ.NAME} expressed in bytes.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.rss"
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.proc.get[{#RABBITMQ.NAME}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "memory"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "2351ceb50bab483e8508547bd5a854a7",
+                                "name": "Memory usage (vsize)",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.proc.vmem[{#RABBITMQ.NAME}]",
+                                "delay": "0",
+                                "units": "B",
+                                "description": "The summary of virtual memory used by a process {#RABBITMQ.NAME} expressed in bytes.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.vsize"
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.proc.get[{#RABBITMQ.NAME}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "memory"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "5e738d9e6d5247dab447191cde833c6a",
+                                "expression": "nodata(/RabbitMQ node by Zabbix agent for PTAF PRO/web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/nodes/{$RABBITMQ.CLUSTER.NAME}@{$RABBITMQ.API.HOST}?memory=true\"],30m)=1 and last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.proc.num[{#RABBITMQ.NAME}])>0",
+                                "name": "RabbitMQ node: Failed to fetch nodes data",
+                                "event_name": "RabbitMQ node: Failed to fetch nodes data (or no data for 30m)",
+                                "priority": "WARNING",
+                                "description": "Zabbix has not received any data for items for the last 30 minutes.",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "RabbitMQ node: Process is not running",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.proc.num[{#RABBITMQ.NAME}])=0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "availability"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "d69a12eb04d04d94b1fb65295047db4d",
+                                "expression": "max(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.node.running,5m)=0 and last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.proc.num[{#RABBITMQ.NAME}])>0",
+                                "name": "RabbitMQ node: Node is not running",
+                                "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                "priority": "AVERAGE",
+                                "description": "RabbitMQ node is not running.",
+                                "dependencies": [
+                                    {
+                                        "name": "RabbitMQ node: Service is down",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/net.tcp.service[\"{$RABBITMQ.API.SCHEME}\",\"{$RABBITMQ.API.HOST}\",\"{$RABBITMQ.API.PORT}\"])=0 and last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.proc.num[{#RABBITMQ.NAME}])>0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "availability"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "69a29580f0024760b80600434f0c1797",
+                                "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/net.tcp.service[\"{$RABBITMQ.API.SCHEME}\",\"{$RABBITMQ.API.HOST}\",\"{$RABBITMQ.API.PORT}\"])=0 and last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.proc.num[{#RABBITMQ.NAME}])>0",
+                                "name": "RabbitMQ node: Service is down",
+                                "priority": "AVERAGE",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "availability"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "26f52e38775a4cb09ba1dfe9c93131e3",
+                                "expression": "min(/RabbitMQ node by Zabbix agent for PTAF PRO/net.tcp.service.perf[\"{$RABBITMQ.API.SCHEME}\",\"{$RABBITMQ.API.HOST}\",\"{$RABBITMQ.API.PORT}\"],5m)>{$RABBITMQ.RESPONSE_TIME.MAX.WARN} and last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.proc.num[{#RABBITMQ.NAME}])>0",
+                                "name": "RabbitMQ node: Service response time is too high",
+                                "event_name": "RabbitMQ node: Service response time is too high (over {$RABBITMQ.RESPONSE_TIME.MAX.WARN}s for 5m)",
+                                "priority": "WARNING",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "RabbitMQ node: Service is down",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/net.tcp.service[\"{$RABBITMQ.API.SCHEME}\",\"{$RABBITMQ.API.HOST}\",\"{$RABBITMQ.API.PORT}\"])=0 and last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.proc.num[{#RABBITMQ.NAME}])>0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "performance"
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "14df8abf16254af0aabf27bf61effa47",
+                                "name": "RabbitMQ: Memory usage[{#RABBITMQ.NAME}]",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "199C0D",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.proc.vmem[{#RABBITMQ.NAME}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "F63100",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.proc.rss[{#RABBITMQ.NAME}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "proc.get[{$RABBITMQ.PROCESS.NAME.PARAMETER},,,summary]"
+                        },
+                        "lld_macro_paths": [
+                            {
+                                "lld_macro": "{#RABBITMQ.NAME}",
+                                "path": "$.name"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "74c7f29e1abb408193b02f24db250fb2",
+                        "name": "Queues discovery",
+                        "type": "DEPENDENT",
+                        "key": "rabbitmq.queues.discovery",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#NODE}",
+                                    "value": "{$RABBITMQ.CLUSTER.NAME}@{HOST.NAME}",
+                                    "formulaid": "A"
+                                },
+                                {
+                                    "macro": "{#QUEUE}",
+                                    "value": "{$RABBITMQ.PTAF.QUEUE.PREFIX}.*",
+                                    "formulaid": "B"
+                                },
+                                {
+                                    "macro": "{#VHOST}",
+                                    "value": "{$RABBITMQ.PTAF.VHOST}",
+                                    "formulaid": "C"
+                                }
+                            ]
+                        },
+                        "description": "The metrics for an individual queue.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "92a65e1cef8e4fc29aa8a778b313f782",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Get data",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "history": "0",
+                                "value_type": "TEXT",
+                                "trends": "0",
+                                "description": "The HTTP API endpoint that returns [{#VHOST}][{#QUEUE}] queue metrics",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.name == \"{#QUEUE}\" && @.vhost == \"{#VHOST}\")].first()"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/queues\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "raw"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b5ae23b3ca7342bf86b18d55f37e683c",
+                                "name": "[custom] Queue [{#VHOST}][{#QUEUE}]: PTAF Backing Queue Status",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.backing_queue_status[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.backing_queue_status"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ba57622e8138441a932be565a574a9a7",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Consumers",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.consumers[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "description": "The number of consumers.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.consumers"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "consumers"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c5771ff678424a7fa06216b5966f122f",
+                                "name": "[custom] Queue [{#VHOST}][{#QUEUE}]: PTAF Consumer Capacity",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.consumer_capacity[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.consumer_capacity"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "16dcdb8d6bd240888496fee476839ff5",
+                                        "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.queue.consumer_capacity[\"{#VHOST}/{#QUEUE}\"])<0.8",
+                                        "name": "PTAF Queue [{#VHOST}][{#QUEUE}]: Low consumer capacity",
+                                        "priority": "WARNING",
+                                        "tags": [
+                                            {
+                                                "tag": "ptaf",
+                                                "value": "queue"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "a8344763563f49dab01f598455bb2d16",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Memory",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.memory[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "units": "B",
+                                "description": "The bytes of memory consumed by the Erlang process associated with the queue, including stack, heap and internal structures.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.memory"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "memory"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "995b88d70d5a43d4b6bf3e084de9c586",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages acknowledged per second",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.ack.rate[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "description": "The number of messages (per second) delivered to clients and acknowledged.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.ack_details.rate"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "0eb686b9aa2640af9597beb5db45d824",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages acknowledged",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.ack[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "description": "The number of messages delivered to clients and acknowledged.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.ack"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "a9a3d0d4ee9e4d25bb925499948df7a0",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages delivered per second",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.deliver.rate[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "description": "The count of messages (per second) delivered to consumers in acknowledgement mode.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.deliver_details.rate"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c229847e863f40aba7fe64904a18c174",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages delivered",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.deliver[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "description": "The count of messages delivered to consumers in acknowledgement mode.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.deliver"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "fe9a6510357340228b9a7c10a7ed8e94",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Sum of messages delivered per second",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.deliver_get.rate[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "description": "The rate of delivery per second. The sum of messages delivered (per second) to consumers: in acknowledgement mode and in no-acknowledgement mode; delivered to consumers in response to `basic.get`: in acknowledgement mode and in no-acknowledgement mode.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.deliver_get_details.rate"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b74271a4c6ae4008af2a427904afb109",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Sum of messages delivered",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.deliver_get[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "description": "The sum of messages delivered to consumers: in acknowledgement mode and in no-acknowledgement mode; delivered to consumers in response to the `basic.get`: in acknowledgement mode and in no-acknowledgement mode.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.deliver_get"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8432be1ce2a84e8882056ac09b3589e1",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages published per second",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.publish.rate[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "description": "The rate of published messages per second.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.publish_details.rate"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "812e41be3a2646aca702d77c1cbaeec6",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages published",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.publish[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "description": "The count of published messages.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.publish"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b0f666516bd64cd7aeac05a993410f07",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages per second",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.rate[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "description": "The count of total messages per second in the queue.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.messages_details.rate"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "d5f982d6cfe644d5a97ce54b2def2fbb",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages redelivered per second",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.redeliver.rate[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "description": "The rate of messages redelivered per second.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.redeliver_details.rate"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "2d0895c8e3984b8c95aa8df8833e6cf6",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages redelivered",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages.redeliver[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "description": "The count of subset of messages in the `deliver_get` queue with the `redelivered` flag set.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.message_stats.redeliver"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "f8276372827f45f88b315923158a8269",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages total",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "description": "The count of total messages in the queue.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.messages"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "509afe47171c497d99bdbb08e530d6f5",
+                                        "expression": "min(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.queue.messages[\"{#VHOST}/{#QUEUE}\"],5m)>{$RABBITMQ.MESSAGES.MAX.WARN:\"{#QUEUE}\"}",
+                                        "name": "RabbitMQ node: Too many messages in queue [{#VHOST}][{#QUEUE}]",
+                                        "event_name": "RabbitMQ node: Too many messages in queue [{#VHOST}][{#QUEUE}] (over {$RABBITMQ.MESSAGES.MAX.WARN:\"{#QUEUE}\"} for 5m)",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "WARNING",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "9d5991fb02b74bcbb4020829d2f432f2",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages ready per second",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages_ready.rate[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "description": "The number of messages per second ready to be delivered to clients.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.messages_ready_details.rate"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e8ee74484fa24d0d9ce105ad644ed527",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages ready",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages_ready[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "description": "The number of messages ready to be delivered to clients.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.messages_ready"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "620a510bd4ef4304a45125420e0b71fe",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages unacknowledged per second",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages_unacknowledged.rate[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "description": "The number of messages per second delivered to clients but not yet acknowledged.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.messages_unacknowledged_details.rate"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e335c82c23c34c47a8e8e2024f3e99e8",
+                                "name": "Queue [{#VHOST}][{#QUEUE}]: Messages unacknowledged",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.messages_unacknowledged[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "description": "The number of messages delivered to clients but not yet acknowledged.",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.messages_unacknowledged"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "messages"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "375435990c9045e985b7990ca36f367c",
+                                "name": "[custom] Queue [{#VHOST}][{#QUEUE}]: PTAF Consumer Utilisation",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.ptaf.consumer_utilisation[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.consumer_utilisation"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ptaf"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "491e0632e03d4cff8db3103906a9eb1d",
+                                "name": "[custom] Queue [{#VHOST}][{#QUEUE}]: PTAF Reductions Rate",
+                                "type": "DEPENDENT",
+                                "key": "rabbitmq.queue.ptaf.reductions_rate[\"{#VHOST}/{#QUEUE}\"]",
+                                "delay": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.reductions_details.rate"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "rabbitmq.get_exchanges[\"{#VHOST}/{#QUEUE}\"]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ptaf"
+                                    },
+                                    {
+                                        "tag": "queue",
+                                        "value": "{#QUEUE}"
+                                    },
+                                    {
+                                        "tag": "vhost",
+                                        "value": "{#VHOST}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "d33fa5d0f9544f8f9d03e502e68149bf",
+                                "expression": "last(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.queue.consumer_capacity[\"{#VHOST}/{#QUEUE}\"])<0.8 and \nfind(/RabbitMQ node by Zabbix agent for PTAF PRO/rabbitmq.queue.consumers[\"{#VHOST}/{#QUEUE}\"],,\"like\",\"ptaf-\")=1",
+                                "name": "PTAF Queue [{#VHOST}][{#QUEUE}]: Low consumer capacity",
+                                "priority": "WARNING",
+                                "tags": [
+                                    {
+                                        "tag": "ptaf",
+                                        "value": "queue"
+                                    },
+                                    {
+                                        "tag": "scope",
+                                        "value": "performance"
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "f28b723eadf44ff393bf7d9e97519fef",
+                                "name": "RabbitMQ: Queue [{#VHOST}][{#QUEUE}]: Consumer Metrics ptaf-conf-mgr",
+                                "graph_items": [
+                                    {
+                                        "color": "1A7C11",
+                                        "calc_fnc": "ALL",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.consumer_capacity[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c8872ab748e34b0b8041ac7234b8e829",
+                                "name": "RabbitMQ: Queue [{#VHOST}][{#QUEUE}]: Messages per second",
+                                "graph_items": [
+                                    {
+                                        "color": "199C0D",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.rate[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "F63100",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.ack.rate[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "color": "00611C",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.deliver.rate[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "3",
+                                        "color": "F7941D",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.deliver_get.rate[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "4",
+                                        "color": "FC6EA3",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.publish.rate[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "5",
+                                        "color": "6C59DC",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages_ready.rate[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "6",
+                                        "color": "C7A72D",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.redeliver.rate[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "7",
+                                        "color": "BA2A5D",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages_unacknowledged.rate[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7b7002b745a24df79a150f8876b7536e",
+                                "name": "RabbitMQ: Queue [{#VHOST}][{#QUEUE}]: Messages status",
+                                "graph_items": [
+                                    {
+                                        "color": "199C0D",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "F63100",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.ack[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "color": "00611C",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.deliver[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "3",
+                                        "color": "F7941D",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.deliver_get[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "4",
+                                        "color": "FC6EA3",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.publish[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "5",
+                                        "color": "6C59DC",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages_ready[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "6",
+                                        "color": "C7A72D",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages.redeliver[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "7",
+                                        "color": "BA2A5D",
+                                        "item": {
+                                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                            "key": "rabbitmq.queue.messages_unacknowledged[\"{#VHOST}/{#QUEUE}\"]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "web.page.get[\"{$RABBITMQ.API.SCHEME}://{$RABBITMQ.API.USER}:{$RABBITMQ.API.PASSWORD}@{$RABBITMQ.API.HOST}:{$RABBITMQ.API.PORT}/api/queues\"]"
+                        },
+                        "lld_macro_paths": [
+                            {
+                                "lld_macro": "{#NODE}",
+                                "path": "$.node"
+                            },
+                            {
+                                "lld_macro": "{#QUEUE}",
+                                "path": "$.name"
+                            },
+                            {
+                                "lld_macro": "{#VHOST}",
+                                "path": "$.vhost"
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "return JSON.stringify(JSON.parse(value),['node','name','vhost']);"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "class",
+                        "value": "software"
+                    },
+                    {
+                        "tag": "ptaf",
+                        "value": "rabbitmq"
+                    },
+                    {
+                        "tag": "target",
+                        "value": "rabbitmq"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$RABBITMQ.API.HOST}",
+                        "value": "rabbitmq1.ptaf.node",
+                        "description": "The hostname or IP of the API endpoint for the RabbitMQ."
+                    },
+                    {
+                        "macro": "{$RABBITMQ.API.PASSWORD}",
+                        "value": "4BDmfVIrnulP4iJYDNcO"
+                    },
+                    {
+                        "macro": "{$RABBITMQ.API.PORT}",
+                        "value": "15672",
+                        "description": "The port of the RabbitMQ API endpoint."
+                    },
+                    {
+                        "macro": "{$RABBITMQ.API.SCHEME}",
+                        "value": "http",
+                        "description": "The request scheme, which may be HTTP or HTTPS."
+                    },
+                    {
+                        "macro": "{$RABBITMQ.API.USER}",
+                        "value": "rabbit"
+                    },
+                    {
+                        "macro": "{$RABBITMQ.CLUSTER.NAME}",
+                        "value": "rabbit",
+                        "description": "The name of the RabbitMQ cluster."
+                    },
+                    {
+                        "macro": "{$RABBITMQ.LLD.FILTER.QUEUE.MATCHES}",
+                        "value": ".*",
+                        "description": "This macro is used in the discovery of queues. It can be overridden at host level or its linked template level."
+                    },
+                    {
+                        "macro": "{$RABBITMQ.LLD.FILTER.QUEUE.NOT_MATCHES}",
+                        "value": "CHANGE_IF_NEEDED",
+                        "description": "This macro is used in the discovery of queues. It can be overridden at host level or its linked template level."
+                    },
+                    {
+                        "macro": "{$RABBITMQ.MESSAGES.MAX.WARN}",
+                        "value": "1000",
+                        "description": "The maximum number of messages in the queue for a trigger expression."
+                    },
+                    {
+                        "macro": "{$RABBITMQ.PROCESS.NAME.PARAMETER}",
+                        "description": "The process name of the RabbitMQ server used in the item key `proc.get`. It could be specified if the correct process name is known."
+                    },
+                    {
+                        "macro": "{$RABBITMQ.PROCESS_NAME}",
+                        "value": "beam.smp",
+                        "description": "The process name filter for the RabbitMQ process discovery."
+                    },
+                    {
+                        "macro": "{$RABBITMQ.PTAF.QUEUE.PREFIX}",
+                        "value": "ptaf-",
+                        "description": "Prefix for PTAF queues identification"
+                    },
+                    {
+                        "macro": "{$RABBITMQ.PTAF.VHOST}",
+                        "value": "ptaf",
+                        "description": "Vhost for PTAF queues"
+                    },
+                    {
+                        "macro": "{$RABBITMQ.RESPONSE_TIME.MAX.WARN}",
+                        "value": "10",
+                        "description": "The maximum response time by the RabbitMQ expressed in seconds for a trigger expression."
+                    }
+                ],
+                "dashboards": [
+                    {
+                        "uuid": "6b62ed9bdfe346c7a1c722d198f0d47f",
+                        "name": "RabbitMQ node status",
+                        "pages": [
+                            {
+                                "widgets": [
+                                    {
+                                        "type": "graph",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "GRAPH",
+                                                "name": "graphid.0",
+                                                "value": {
+                                                    "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                                    "name": "RabbitMQ: Node status"
+                                                }
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AAAAA"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "graph",
+                                        "y": "5",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "GRAPH",
+                                                "name": "graphid.0",
+                                                "value": {
+                                                    "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                                    "name": "RabbitMQ: Disk free"
+                                                }
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AAAAC"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "graph",
+                                        "y": "10",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "GRAPH",
+                                                "name": "graphid.0",
+                                                "value": {
+                                                    "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                                    "name": "RabbitMQ: File descriptors"
+                                                }
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AAAAE"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "graph",
+                                        "x": "36",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "GRAPH",
+                                                "name": "graphid.0",
+                                                "value": {
+                                                    "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                                    "name": "RabbitMQ: Uptime"
+                                                }
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AAAAB"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "graph",
+                                        "x": "36",
+                                        "y": "5",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "GRAPH",
+                                                "name": "graphid.0",
+                                                "value": {
+                                                    "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                                    "name": "RabbitMQ: Memory used"
+                                                }
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AAAAD"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "graph",
+                                        "x": "36",
+                                        "y": "10",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "GRAPH",
+                                                "name": "graphid.0",
+                                                "value": {
+                                                    "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                                                    "name": "RabbitMQ: Sockets"
+                                                }
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AAAAF"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "71e1e91dc84d43aab6f0ab6286a72849",
+                        "name": "Alarm state",
+                        "mappings": [
+                            {
+                                "value": "0",
+                                "newvalue": "Ok"
+                            },
+                            {
+                                "value": "1",
+                                "newvalue": "Alarm"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "3880f01eb1324470a07935ba08cc8a43",
+                        "name": "RabbitMQ healthcheck",
+                        "mappings": [
+                            {
+                                "value": "0",
+                                "newvalue": "Failed"
+                            },
+                            {
+                                "value": "1",
+                                "newvalue": "Ok"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "Error"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "e8159ed9406a4aa1a08d2893ccd3b311",
+                        "name": "Service state",
+                        "mappings": [
+                            {
+                                "value": "0",
+                                "newvalue": "Down"
+                            },
+                            {
+                                "value": "1",
+                                "newvalue": "Up"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "graphs": [
+            {
+                "uuid": "a2ca60b385c440178e0815e0d396fcea",
+                "name": "RabbitMQ: Disk free",
+                "graph_items": [
+                    {
+                        "drawtype": "GRADIENT_LINE",
+                        "color": "199C0D",
+                        "item": {
+                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                            "key": "rabbitmq.node.disk_free"
+                        }
+                    },
+                    {
+                        "sortorder": "1",
+                        "drawtype": "BOLD_LINE",
+                        "color": "FF0000",
+                        "item": {
+                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                            "key": "rabbitmq.node.disk_free_limit"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "c1e6ddf0aa0943e78e9dc1cabbb21c2f",
+                "name": "RabbitMQ: File descriptors",
+                "graph_items": [
+                    {
+                        "color": "199C0D",
+                        "item": {
+                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                            "key": "rabbitmq.node.fd_used"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "a31546b8d6544e8784944bbaf2baeb37",
+                "name": "RabbitMQ: Memory used",
+                "graph_items": [
+                    {
+                        "drawtype": "GRADIENT_LINE",
+                        "color": "199C0D",
+                        "item": {
+                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                            "key": "rabbitmq.node.mem_used"
+                        }
+                    },
+                    {
+                        "sortorder": "1",
+                        "drawtype": "BOLD_LINE",
+                        "color": "FF0000",
+                        "item": {
+                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                            "key": "rabbitmq.node.mem_limit"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "b5b8728b4dd74697a31965db9c02bdfa",
+                "name": "RabbitMQ: Node status",
+                "graph_items": [
+                    {
+                        "drawtype": "BOLD_LINE",
+                        "color": "199C0D",
+                        "item": {
+                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                            "key": "rabbitmq.node.running"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "57afb5dca7694ae09a262bc629800343",
+                "name": "RabbitMQ: Sockets",
+                "graph_items": [
+                    {
+                        "drawtype": "GRADIENT_LINE",
+                        "color": "199C0D",
+                        "item": {
+                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                            "key": "rabbitmq.node.sockets_used"
+                        }
+                    },
+                    {
+                        "sortorder": "1",
+                        "color": "F63100",
+                        "item": {
+                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                            "key": "rabbitmq.node.sockets_total"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "fd299942207345438c98931035779eb1",
+                "name": "RabbitMQ: Uptime",
+                "graph_items": [
+                    {
+                        "color": "199C0D",
+                        "item": {
+                            "host": "RabbitMQ node by Zabbix agent for PTAF PRO",
+                            "key": "rabbitmq.node.uptime"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
