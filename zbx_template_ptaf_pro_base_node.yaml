@@ -1,15 +1,20 @@
 zabbix_export:
   version: '7.0'
   template_groups:
-    - uuid: 846977d1dfed4968bc5f8bdb363285bc
-      name: 'Templates/Operating systems'
+    - uuid: 36bff6c29af64692839d077febfc7079
+      name: 'Templates/Network devices'
   templates:
     - uuid: 6d3f54d0e93f446e94abcc464f761534
-      template: 'Linux by Zabbix agent for PTAF PRO'
-      name: 'Linux by Zabbix agent for PTAF PRO'
-      description: 'This is an unofficial Linux template for PTAF PRO. It requires Zabbix agent 7.0 or newer. Version template 1.0, contact to @KH93b '
+      template: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
+      name: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
+      description: |
+        This is an unofficial template for PTAF PRO. 
+        It requires Zabbix agent 5.0 or newer. 
+        
+        Version template 1.3, contact to Telegram @KH93b
+        https://addons.ptsecurity.com/zabbix-agent-dlya-ptaf-pro
       groups:
-        - name: 'Templates/Operating systems'
+        - name: 'Templates/Network devices'
       items:
         - uuid: fcca68b14fab4956a7fab61d432dc219
           name: 'Host name of Zabbix agent running'
@@ -60,7 +65,7 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 3d7586eb24d344e59353f13ef07458c9
-              expression: 'last(/Linux by Zabbix agent for PTAF PRO/kernel.maxfiles)<{$KERNEL.MAXFILES.MIN}'
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/kernel.maxfiles)<{$KERNEL.MAXFILES.MIN}'
               name: 'Linux: Configured max number of open filedescriptors is too low'
               event_name: 'Linux: Configured max number of open filedescriptors is too low (< {$KERNEL.MAXFILES.MIN})'
               priority: INFO
@@ -81,13 +86,13 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 48d71d6bb1fe402e81476b82fd9f063b
-              expression: 'last(/Linux by Zabbix agent for PTAF PRO/kernel.maxproc)<{$KERNEL.MAXPROC.MIN}'
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/kernel.maxproc)<{$KERNEL.MAXPROC.MIN}'
               name: 'Linux: Configured max number of processes is too low'
               event_name: 'Linux: Configured max number of processes is too low (< {$KERNEL.MAXPROC.MIN})'
               priority: INFO
               dependencies:
                 - name: 'Linux: Getting closer to process limit'
-                  expression: 'last(/Linux by Zabbix agent for PTAF PRO/proc.num)/last(/Linux by Zabbix agent for PTAF PRO/kernel.maxproc)*100>80'
+                  expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num)/last(/PTAF PRO Base Node  Monitoring by Zabbix agent/kernel.maxproc)*100>80'
               tags:
                 - tag: scope
                   value: performance
@@ -97,12 +102,231 @@ zabbix_export:
           tags:
             - tag: component
               value: system
+        - uuid: 1ff7d9386bc140a083b23b7e0af125c6
+          name: 'PTAF process status ptaf-correlator'
+          key: 'proc.num[,,,/opt/correlator/bin/CorrelationService]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: ptaf
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 6afc2996ec294f76a8004931d37636aa
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[,,,/opt/correlator/bin/CorrelationService])<1'
+              name: 'PTAF service ptaf-correlator Down'
+              priority: HIGH
+              description: 'Коррелятор недоступен'
+              manual_close: 'YES'
+        - uuid: ae9fc93938c94612bca4bba528eddafa
+          name: 'PTAF process status ptaf-core-rs-*'
+          key: 'proc.num[,,,/opt/ptaf/bin/ptaf-core-ctl]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: ptaf
+            - tag: component
+              value: system
+          triggers:
+            - uuid: e257c38a4cac41f3b9b92774eccf6c5c
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[,,,/opt/ptaf/bin/ptaf-core-ctl])>20'
+              name: 'PTAF service ptaf-core-rs more 20'
+              priority: HIGH
+              description: 'Подов обработки трафика больше 20'
+              manual_close: 'YES'
+        - uuid: da41b72a798b41d0b8583b0447e90e20
+          name: 'PTAF process status ptaf_report_mgr'
+          key: 'proc.num[,,,python -m ptaf_report_mgr]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: ptaf
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 2bc0d6c18d3d4471b9c8c50940598887
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[,,,python -m ptaf_report_mgr])<1'
+              name: 'PTAF service ptaf-report-mgr is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
         - uuid: 73e748b4eadb4d7ba774c9e778a69ad6
           name: 'Number of running processes'
           key: 'proc.num[,,run]'
           tags:
             - tag: component
               value: system
+        - uuid: e43525330c154a858fa54bb727616026
+          name: 'PTAF process status beam.smp'
+          key: 'proc.num[beam.smp]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: aad1e637815c46bfba4530d8f3a4ba54
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[beam.smp])<1'
+              name: 'PTAF service beam.smp is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: 8ad61de4d430404196003ce67996609c
+          name: 'PTAF process status border'
+          key: 'proc.num[border]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: ptaf
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 9a5aff1e562b4475bf48ef2d25070795
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[border])<1'
+              name: 'PTAF service ptaf-border is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: 25ae987886894db4862a900106c1959b
+          name: 'PTAF process status clickhouse-server'
+          key: 'proc.num[clickhouse-server,,,/usr/bin/clickhouse-server]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 5ab1454af17a48d79b8d73dcdfd354e8
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[clickhouse-server,,,/usr/bin/clickhouse-server])<1'
+              name: 'PTAF service clickhouse-server is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: ddc53f768d874866a90f6dd2d9052794
+          name: 'PTAF process status containerd'
+          key: 'proc.num[containerd]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: bf532ace584a46b780c79c9aa8a522d2
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[containerd])<1'
+              name: 'PTAF service containerd is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: d3e680df8e7e42c59a3fe43225d496f0
+          name: 'PTAF process status etcd'
+          key: 'proc.num[etcd]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: f3e4122556f64d90b225aa761dfbfaca
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[etcd])<2'
+              name: 'PTAF service etcd is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: 6d7ef8901f25412b92c33016e911cbf7
+          name: 'PTAF process status grafana'
+          key: 'proc.num[grafana]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 4ec87eabff5b44598d9cec93fc9bfe69
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[grafana])<1'
+              name: 'PTAF service Grafana is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: 5612a5f7387542d5844d5eef33a6fafa
+          name: 'PTAF process status kubelet'
+          key: 'proc.num[kubelet]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: a72adbc0e9a34b48b1bc3d0d2a471ba4
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[kubelet])<1'
+              name: 'PTAF service kubelet is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: c62490a31c584130bda2b2153dd28e0c
+          name: 'PTAF process status minio'
+          key: 'proc.num[minio]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 4522afdefed948da936ae235ed0118d9
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[minio])<1'
+              name: 'PTAF service minio is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: e07b1101085f4c2088cadd335e2aace2
+          name: 'PTAF process status postgres'
+          key: 'proc.num[postgres,,,/usr/lib/postgresql/14/bin/postgres]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: daf0ca38d6814235abc3e1c317b21993
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[postgres,,,/usr/lib/postgresql/14/bin/postgres])<1'
+              name: 'PTAF service postgres is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: b1bd1a4cacd64715984dbb16651bc029
+          name: 'PTAF process status ptaf-restproxy'
+          key: 'proc.num[ptaf-restproxy]'
+          trends: '0'
+          status: DISABLED
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 35923e9144554376b565b59b3301c202
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[ptaf-restproxy])<1'
+              name: 'PTAF service ptaf-restproxy is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: 5eb48f2de039428b88a420cef56ba8aa
+          name: 'PTAF process status vault'
+          key: 'proc.num[vault]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: ed4862b331cf4879886c81c077cf882d
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[vault])<1'
+              name: 'PTAF service vault is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
+        - uuid: f15de393f6a44fa3b2df35b8a71699cd
+          name: 'PTAF process status wsc-daemon'
+          key: 'proc.num[wsc-daemon]'
+          trends: '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 35070acb53fd41ad93fe39f75de7073b
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[wsc-daemon])<1'
+              name: 'PTAF service wsc-daemon is Down'
+              priority: HIGH
+              description: 'Важная для работоспособности PTAF PRO служба не запущена'
+              manual_close: 'YES'
         - uuid: bd9f19e982994ce9bdda8627ea01ff64
           name: 'System boot time'
           key: system.boottime
@@ -192,7 +416,7 @@ zabbix_export:
               value: cpu
           triggers:
             - uuid: 1727449e399a43a493cfa8f2878fb3a0
-              expression: 'min(/Linux by Zabbix agent for PTAF PRO/system.cpu.util,5m)>{$CPU.UTIL.CRIT}'
+              expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.cpu.util,5m)>{$CPU.UTIL.CRIT}'
               name: 'Linux: High CPU utilization'
               event_name: 'Linux: High CPU utilization (over {$CPU.UTIL.CRIT}% for 5m)'
               opdata: 'Current utilization: {ITEM.LASTVALUE1}'
@@ -201,9 +425,9 @@ zabbix_export:
               dependencies:
                 - name: 'Linux: Load average is too high'
                   expression: |
-                    min(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg1],5m)/last(/Linux by Zabbix agent for PTAF PRO/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}
-                    and last(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg5])>0
-                    and last(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg15])>0
+                    min(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.cpu.load[all,avg1],5m)/last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}
+                    and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.cpu.load[all,avg5])>0
+                    and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.cpu.load[all,avg15])>0
               tags:
                 - tag: scope
                   value: performance
@@ -314,7 +538,7 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 79fb3a2e9f554bfdaecfe563db0d2725
-              expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.hostname) and length(last(/Linux by Zabbix agent for PTAF PRO/system.hostname))>0'
+              expression: 'change(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.hostname) and length(last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.hostname))>0'
               name: 'Linux: System name has changed'
               event_name: 'Linux: System name has changed (new name: {ITEM.VALUE})'
               priority: INFO
@@ -335,9 +559,9 @@ zabbix_export:
               value: system
           triggers:
             - uuid: acd9cecdabb646a4b9ab0086295a9094
-              expression: 'fuzzytime(/Linux by Zabbix agent for PTAF PRO/system.localtime,{$SYSTEM.FUZZYTIME.MAX})=0'
+              expression: 'fuzzytime(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.localtime,{$SYSTEM.FUZZYTIME.MAX})=0'
               recovery_mode: RECOVERY_EXPRESSION
-              recovery_expression: 'fuzzytime(/Linux by Zabbix agent for PTAF PRO/system.localtime,{$SYSTEM.FUZZYTIME.MIN})=1'
+              recovery_expression: 'fuzzytime(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.localtime,{$SYSTEM.FUZZYTIME.MIN})=1'
               name: 'Linux: System time is out of sync'
               event_name: 'Linux: System time is out of sync (diff with Zabbix server > {$SYSTEM.FUZZYTIME.MAX})'
               priority: WARNING
@@ -378,34 +602,37 @@ zabbix_export:
               value: os
           triggers:
             - uuid: 29c5a6f1be6f43ce8c71279c639e4347
-              expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.sw.os) and length(last(/Linux by Zabbix agent for PTAF PRO/system.sw.os))>0'
+              expression: 'change(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.sw.os) and length(last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.sw.os))>0'
               name: 'Linux: Operating system description has changed'
               priority: INFO
               description: 'The description of the operating system has changed. Possible reasons are that the system has been updated or replaced. Acknowledge to close the problem manually.'
               manual_close: 'YES'
               dependencies:
                 - name: 'Linux: System name has changed'
-                  expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.hostname) and length(last(/Linux by Zabbix agent for PTAF PRO/system.hostname))>0'
+                  expression: 'change(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.hostname) and length(last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.hostname))>0'
               tags:
                 - tag: scope
                   value: notice
         - uuid: ad9df245a4a84343a1f3391a47f0573a
           name: 'Number of installed packages'
-          key: system.sw.packages.get
+          key: system.sw.packages
           delay: 1h
+          value_type: TEXT
+          trends: '0'
           preprocessing:
-            - type: JSONPATH
+            - type: REGEX
               parameters:
-                - $.length()
-            - type: DISCARD_UNCHANGED_HEARTBEAT
+                - '\[dpkg\] (.*)'
+                - \1
+            - type: JAVASCRIPT
               parameters:
-                - 12h
+                - 'return value.split('','').length;'
           tags:
             - tag: component
               value: os
           triggers:
             - uuid: c01e4b93b898471686098c9982d92386
-              expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.sw.packages.get)<>0'
+              expression: 'change(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.sw.packages)<>0'
               name: 'Linux: Number of installed packages has been changed'
               priority: WARNING
               manual_close: 'YES'
@@ -469,7 +696,7 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 025660f51afc4e5a98a34e2812ce6486
-              expression: 'last(/Linux by Zabbix agent for PTAF PRO/system.uptime)<10m'
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.uptime)<10m'
               name: 'Linux: {HOST.NAME} has been restarted'
               event_name: 'Linux: {HOST.NAME} has been restarted (uptime < 10m)'
               priority: WARNING
@@ -487,7 +714,7 @@ zabbix_export:
               value: environment
         - uuid: a69c496e48084aeda6a390a919ea85cf
           name: 'Checksum of /etc/passwd'
-          key: 'vfs.file.cksum[/etc/passwd,sha256]'
+          key: 'vfs.file.md5sum[/etc/passwd]'
           delay: 15m
           value_type: CHAR
           trends: '0'
@@ -500,15 +727,15 @@ zabbix_export:
               value: security
           triggers:
             - uuid: ece5e7c7e213486887d1ef78c1244c10
-              expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.cksum[/etc/passwd,sha256],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.cksum[/etc/passwd,sha256],#2)'
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.md5sum[/etc/passwd],#1)<>last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.md5sum[/etc/passwd],#2)'
               name: 'Linux: /etc/passwd has been changed'
               priority: INFO
               manual_close: 'YES'
               dependencies:
                 - name: 'Linux: Operating system description has changed'
-                  expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.sw.os) and length(last(/Linux by Zabbix agent for PTAF PRO/system.sw.os))>0'
+                  expression: 'change(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.sw.os) and length(last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.sw.os))>0'
                 - name: 'Linux: System name has changed'
-                  expression: 'change(/Linux by Zabbix agent for PTAF PRO/system.hostname) and length(last(/Linux by Zabbix agent for PTAF PRO/system.hostname))>0'
+                  expression: 'change(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.hostname) and length(last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.hostname))>0'
               tags:
                 - tag: scope
                   value: security
@@ -539,15 +766,15 @@ zabbix_export:
           units: '%'
           triggers:
             - uuid: 162f1b7491b14070b332322622a2c828
-              expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.size[/var/lib,pfree])<25'
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.size[/var/lib,pfree])<25'
               name: 'Low free space on /var/lib (< 25%)'
               priority: DISASTER
             - uuid: fc5de5a69ae5454ebae1800c8241b666
-              expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.size[/var/lib,pfree])<30'
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.size[/var/lib,pfree])<30'
               name: 'Low free space on /var/lib (< 30%)'
               priority: HIGH
             - uuid: d0d856496c554e11ba07d1b4e4a927e3
-              expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.size[/var/lib,pfree])<35'
+              expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.size[/var/lib,pfree])<35'
               name: 'Low free space on /var/lib (< 35%)'
               priority: AVERAGE
         - uuid: 849e24fc94984839af2d2080d121b4be
@@ -599,14 +826,14 @@ zabbix_export:
               value: memory
           triggers:
             - uuid: b5bdbf97b852411db7ae8e5e39b218e9
-              expression: 'min(/Linux by Zabbix agent for PTAF PRO/vm.memory.utilization,5m)>{$MEMORY.UTIL.MAX}'
+              expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vm.memory.utilization,5m)>{$MEMORY.UTIL.MAX}'
               name: 'Linux: High memory utilization'
               event_name: 'Linux: High memory utilization (>{$MEMORY.UTIL.MAX}% for 5m)'
               priority: AVERAGE
               description: 'The system is running out of free memory.'
               dependencies:
                 - name: 'Linux: Lack of available memory'
-                  expression: 'max(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[available],5m)<{$MEMORY.AVAILABLE.MIN} and last(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[total])>0'
+                  expression: 'max(/PTAF PRO Base Node  Monitoring by Zabbix agent/vm.memory.size[available],5m)<{$MEMORY.AVAILABLE.MIN} and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vm.memory.size[total])>0'
               tags:
                 - tag: scope
                   value: capacity
@@ -624,7 +851,7 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 59f5e4274fc5420caa3520a4a0db22eb
-              expression: 'max(/Linux by Zabbix agent for PTAF PRO/zabbix[host,agent,available],{$AGENT.TIMEOUT})=0'
+              expression: 'max(/PTAF PRO Base Node  Monitoring by Zabbix agent/zabbix[host,agent,available],{$AGENT.TIMEOUT})=0'
               name: 'Linux: Zabbix agent is not available'
               event_name: 'Linux: Zabbix agent is not available (for {$AGENT.TIMEOUT})'
               priority: AVERAGE
@@ -780,9 +1007,9 @@ zabbix_export:
                   value: '{#IFNAME}'
               trigger_prototypes:
                 - uuid: 0afefd21fc784495a0208304afef1485
-                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
                   recovery_mode: RECOVERY_EXPRESSION
-                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+                  recovery_expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
                   name: 'Linux: Interface {#IFNAME}: Link down'
                   opdata: 'Current state: {ITEM.LASTVALUE1}'
                   priority: AVERAGE
@@ -843,15 +1070,15 @@ zabbix_export:
           trigger_prototypes:
             - uuid: 8338912719c44859a488ccd8e1b68231
               expression: |
-                change(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])<0 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0
+                change(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])<0 and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0
                 and
-                (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/type"])=6 or last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/type"])=1)
+                (last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/type"])=6 or last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/type"])=1)
                 and
-                (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2)
+                (last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2)
               recovery_mode: RECOVERY_EXPRESSION
               recovery_expression: |
-                (change(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"],#2)>0) or
-                (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2)
+                (change(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0 and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"],#2)>0) or
+                (last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2)
               name: 'Linux: Interface {#IFNAME}: Ethernet has changed to lower speed than it was before'
               opdata: 'Current reported speed: {ITEM.LASTVALUE1}'
               priority: INFO
@@ -859,20 +1086,20 @@ zabbix_export:
               manual_close: 'YES'
               dependencies:
                 - name: 'Linux: Interface {#IFNAME}: Link down'
-                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
-                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
               tags:
                 - tag: scope
                   value: performance
             - uuid: 3b0b0761d43f4a7d8fa9222833d6da67
               expression: |
-                (avg(/Linux by Zabbix agent for PTAF PRO/net.if.in["{#IFNAME}"],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]) or
-                avg(/Linux by Zabbix agent for PTAF PRO/net.if.out["{#IFNAME}"],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])) and
-                last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0
+                (avg(/PTAF PRO Base Node  Monitoring by Zabbix agent/net.if.in["{#IFNAME}"],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]) or
+                avg(/PTAF PRO Base Node  Monitoring by Zabbix agent/net.if.out["{#IFNAME}"],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])) and
+                last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0
               recovery_mode: RECOVERY_EXPRESSION
               recovery_expression: |
-                avg(/Linux by Zabbix agent for PTAF PRO/net.if.in["{#IFNAME}"],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]) and
-                avg(/Linux by Zabbix agent for PTAF PRO/net.if.out["{#IFNAME}"],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])
+                avg(/PTAF PRO Base Node  Monitoring by Zabbix agent/net.if.in["{#IFNAME}"],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]) and
+                avg(/PTAF PRO Base Node  Monitoring by Zabbix agent/net.if.out["{#IFNAME}"],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])
               name: 'Linux: Interface {#IFNAME}: High bandwidth usage'
               event_name: 'Linux: Interface {#IFNAME}: High bandwidth usage (>{$IF.UTIL.MAX:"{#IFNAME}"}%)'
               opdata: 'In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}'
@@ -881,19 +1108,19 @@ zabbix_export:
               manual_close: 'YES'
               dependencies:
                 - name: 'Linux: Interface {#IFNAME}: Link down'
-                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
-                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
               tags:
                 - tag: scope
                   value: performance
             - uuid: bb46de5e7d674feabd77fabd3918e608
               expression: |
-                min(/Linux by Zabbix agent for PTAF PRO/net.if.in["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
-                or min(/Linux by Zabbix agent for PTAF PRO/net.if.out["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+                min(/PTAF PRO Base Node  Monitoring by Zabbix agent/net.if.in["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+                or min(/PTAF PRO Base Node  Monitoring by Zabbix agent/net.if.out["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
               recovery_mode: RECOVERY_EXPRESSION
               recovery_expression: |
-                max(/Linux by Zabbix agent for PTAF PRO/net.if.in["{#IFNAME}",errors],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
-                and max(/Linux by Zabbix agent for PTAF PRO/net.if.out["{#IFNAME}",errors],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+                max(/PTAF PRO Base Node  Monitoring by Zabbix agent/net.if.in["{#IFNAME}",errors],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+                and max(/PTAF PRO Base Node  Monitoring by Zabbix agent/net.if.out["{#IFNAME}",errors],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
               name: 'Linux: Interface {#IFNAME}: High error rate'
               event_name: 'Linux: Interface {#IFNAME}: High error rate (>{$IF.ERRORS.WARN:"{#IFNAME}"} for 5m)'
               opdata: 'errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}'
@@ -902,8 +1129,8 @@ zabbix_export:
               manual_close: 'YES'
               dependencies:
                 - name: 'Linux: Interface {#IFNAME}: Link down'
-                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
-                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
               tags:
                 - tag: scope
                   value: availability
@@ -916,37 +1143,37 @@ zabbix_export:
                 - drawtype: GRADIENT_LINE
                   color: 199C0D
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'net.if.in["{#IFNAME}"]'
                 - sortorder: '1'
                   drawtype: BOLD_LINE
                   color: F63100
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'net.if.out["{#IFNAME}"]'
                 - sortorder: '2'
                   color: 00611C
                   yaxisside: RIGHT
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'net.if.out["{#IFNAME}",errors]'
                 - sortorder: '3'
                   color: F7941D
                   yaxisside: RIGHT
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'net.if.in["{#IFNAME}",errors]'
                 - sortorder: '4'
                   color: FC6EA3
                   yaxisside: RIGHT
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'net.if.out["{#IFNAME}",dropped]'
                 - sortorder: '5'
                   color: 6C59DC
                   yaxisside: RIGHT
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'net.if.in["{#IFNAME}",dropped]'
         - uuid: 68c4736365c742c48c31eb97b20e30fb
           name: 'Block devices discovery'
@@ -1149,7 +1376,7 @@ zabbix_export:
                   value: raw
           trigger_prototypes:
             - uuid: 2565e7945fa2487b936520d773d10a18
-              expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.dev.read.await[{#DEVNAME}],15m) > {$VFS.DEV.READ.AWAIT.WARN:"{#DEVNAME}"} or min(/Linux by Zabbix agent for PTAF PRO/vfs.dev.write.await[{#DEVNAME}],15m) > {$VFS.DEV.WRITE.AWAIT.WARN:"{#DEVNAME}"}'
+              expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.dev.read.await[{#DEVNAME}],15m) > {$VFS.DEV.READ.AWAIT.WARN:"{#DEVNAME}"} or min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.dev.write.await[{#DEVNAME}],15m) > {$VFS.DEV.WRITE.AWAIT.WARN:"{#DEVNAME}"}'
               name: 'Linux: {#DEVNAME}: Disk read/write request responses are too high'
               event_name: 'Linux: {#DEVNAME}: Disk read/write request responses are too high (read > {$VFS.DEV.READ.AWAIT.WARN:"{#DEVNAME}"} ms for 15m or write > {$VFS.DEV.WRITE.AWAIT.WARN:"{#DEVNAME}"} ms for 15m)'
               priority: WARNING
@@ -1164,26 +1391,26 @@ zabbix_export:
               graph_items:
                 - color: 199C0D
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.dev.read.await[{#DEVNAME}]'
                 - sortorder: '1'
                   drawtype: GRADIENT_LINE
                   color: F63100
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.dev.write.await[{#DEVNAME}]'
             - uuid: 2e2c1e7f0c21499083485caa0078c78a
               name: '{#DEVNAME}: Disk read/write rates'
               graph_items:
                 - color: 199C0D
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.dev.read.rate[{#DEVNAME}]'
                 - sortorder: '1'
                   drawtype: GRADIENT_LINE
                   color: F63100
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.dev.write.rate[{#DEVNAME}]'
             - uuid: aca4270f6ca3474f9ca1b32ebddaca6e
               name: '{#DEVNAME}: Disk utilization and queue'
@@ -1191,13 +1418,13 @@ zabbix_export:
                 - color: 199C0D
                   yaxisside: RIGHT
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.dev.queue_size[{#DEVNAME}]'
                 - sortorder: '1'
                   drawtype: GRADIENT_LINE
                   color: F63100
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.dev.util[{#DEVNAME}]'
         - uuid: 3d7055850d044d1c8022af7d81273db4
           name: 'Mounted filesystem discovery'
@@ -1208,19 +1435,22 @@ zabbix_export:
             evaltype: AND
             conditions:
               - macro: '{#FSNAME}'
-                value: '{$VFS.FS.FSNAME.MATCHES}'
+                value: '^(?!/var/lib/kubelet).*$'
                 formulaid: A
+              - macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.MATCHES}'
+                formulaid: B
               - macro: '{#FSNAME}'
                 value: '{$VFS.FS.FSNAME.NOT_MATCHES}'
                 operator: NOT_MATCHES_REGEX
-                formulaid: B
+                formulaid: C
               - macro: '{#FSTYPE}'
                 value: '{$VFS.FS.FSTYPE.MATCHES}'
-                formulaid: C
+                formulaid: D
               - macro: '{#FSTYPE}'
                 value: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
                 operator: NOT_MATCHES_REGEX
-                formulaid: D
+                formulaid: E
           description: 'The discovery of mounted filesystems with different types.'
           item_prototypes:
             - uuid: dd41043229a443a5b8c5bca3af509273
@@ -1246,7 +1476,7 @@ zabbix_export:
                   value: '{#FSTYPE}'
               trigger_prototypes:
                 - uuid: 19cd76a38eca478bb27b8c0208397516
-                  expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
+                  expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.dependent.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
                   name: 'Linux: FS [{#FSNAME}]: Running out of free inodes'
                   event_name: 'Linux: {#FSNAME}: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}%)'
                   opdata: 'Free inodes: {ITEM.LASTVALUE1}'
@@ -1258,7 +1488,7 @@ zabbix_export:
                     - tag: scope
                       value: performance
                 - uuid: 8d9b645f07fd4695a918b3e7868916da
-                  expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}'
+                  expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.dependent.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}'
                   name: 'Linux: FS [{#FSNAME}]: Running out of free inodes'
                   event_name: 'Linux: FS [{#FSNAME}]: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}%)'
                   opdata: 'Free inodes: {ITEM.LASTVALUE1}'
@@ -1266,7 +1496,7 @@ zabbix_export:
                   description: 'Disk writing may fail if index nodes are exhausted, leading to error messages like "No space left on device" or "Disk is full", despite available free space.'
                   dependencies:
                     - name: 'Linux: FS [{#FSNAME}]: Running out of free inodes'
-                      expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
+                      expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.dependent.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
                   tags:
                     - tag: scope
                       value: capacity
@@ -1315,7 +1545,7 @@ zabbix_export:
                   value: '{#FSTYPE}'
               trigger_prototypes:
                 - uuid: 7230e5ff180746e79c3b04f16761c422
-                  expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}'
+                  expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}'
                   name: 'Linux: FS [{#FSNAME}]: Space is critically low'
                   event_name: 'Linux: FS [{#FSNAME}]: Space is critically low (used > {$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}%, total {{?last(//vfs.fs.dependent.size[{#FSNAME},total])/1024/1024/1024}.fmtnum(1)}GB)'
                   opdata: 'Space used: {{ITEM.LASTVALUE1}.fmtnum(1)}%'
@@ -1331,7 +1561,7 @@ zabbix_export:
                     - tag: scope
                       value: capacity
                 - uuid: 6f78af7f73104e4285f939b533dfc7a9
-                  expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}'
+                  expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}'
                   name: 'Linux: FS [{#FSNAME}]: Space is low'
                   event_name: 'Linux: FS [{#FSNAME}]: Space is low (used > {$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}%, total {{?last(//vfs.fs.dependent.size[{#FSNAME},total])/1024/1024/1024}.fmtnum(1)}GB)'
                   opdata: 'Space used: {{ITEM.LASTVALUE1}.fmtnum(1)}%'
@@ -1343,7 +1573,7 @@ zabbix_export:
                   manual_close: 'YES'
                   dependencies:
                     - name: 'Linux: FS [{#FSNAME}]: Space is critically low'
-                      expression: 'min(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}'
+                      expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.dependent.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}'
                   tags:
                     - tag: scope
                       value: availability
@@ -1441,9 +1671,9 @@ zabbix_export:
                   value: '{#FSTYPE}'
               trigger_prototypes:
                 - uuid: edc661dc5be740f6877ff7fc638c01ce
-                  expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent[{#FSNAME},readonly],#2)=0 and last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent[{#FSNAME},readonly])=1'
+                  expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.dependent[{#FSNAME},readonly],#2)=0 and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.dependent[{#FSNAME},readonly])=1'
                   recovery_mode: RECOVERY_EXPRESSION
-                  recovery_expression: 'last(/Linux by Zabbix agent for PTAF PRO/vfs.fs.dependent[{#FSNAME},readonly])=0'
+                  recovery_expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.fs.dependent[{#FSNAME},readonly])=0'
                   name: 'Linux: FS [{#FSNAME}]: Filesystem has become read-only'
                   priority: AVERAGE
                   description: 'The filesystem has become read-only, possibly due to an I/O error. Available only for Zabbix agents 6.4 and higher.'
@@ -1465,7 +1695,7 @@ zabbix_export:
                   color: F63100
                   calc_fnc: ALL
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.fs.dependent.size[{#FSNAME},pused]'
             - uuid: b8e787f850e24f5f88d1c93f3c49ca11
               name: 'FS [{#FSTYPE}({#FSNAME})]: Space utilization chart (relative to total)'
@@ -1478,19 +1708,19 @@ zabbix_export:
                   calc_fnc: LAST
                   type: GRAPH_SUM
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.fs.dependent.size[{#FSNAME},total]'
                 - sortorder: '1'
                   color: F63100
                   calc_fnc: LAST
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.fs.dependent.size[{#FSNAME},used]'
                 - sortorder: '2'
                   color: 199C09
                   calc_fnc: LAST
                   item:
-                    host: 'Linux by Zabbix agent for PTAF PRO'
+                    host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                     key: 'vfs.fs.dependent.size[{#FSNAME},free]'
           master_item:
             key: vfs.fs.get
@@ -1595,7 +1825,7 @@ zabbix_export:
           value: .+
           description: 'Used for filesystem discovery. Can be overridden on the host or linked template level.'
         - macro: '{$VFS.FS.FSNAME.NOT_MATCHES}'
-          value: ^(/dev|/sys|/run|/proc|.+/shm$)
+          value: 'vfs.fs.discovery[,"/",,"^(/dev|/sys|/run|/proc|.+/shm$)"]'
           description: 'Used for filesystem discovery. Can be overridden on the host or linked template level.'
         - macro: '{$VFS.FS.FSTYPE.MATCHES}'
           value: ^(btrfs|ext2|ext3|ext4|reiser|xfs|ffs|ufs|jfs|jfs2|vxfs|hfs|apfs|refs|ntfs|fat32|zfs)$
@@ -1631,7 +1861,7 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: 'FS [{#FSTYPE}({#FSNAME})]: Space utilization chart (relative to total)'
                     - type: STRING
                       name: reference
@@ -1647,7 +1877,7 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: 'FS [{#FSTYPE}({#FSNAME})]: Space usage graph, in % (relative to max available)'
                     - type: STRING
                       name: reference
@@ -1667,7 +1897,7 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: 'Interface {#IFNAME}: Network traffic'
                     - type: STRING
                       name: reference
@@ -1683,7 +1913,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: 'Linux: System load'
                     - type: STRING
                       name: reference
@@ -1696,7 +1926,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: 'Linux: Memory usage'
                     - type: STRING
                       name: reference
@@ -1712,7 +1942,7 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: 'FS [{#FSTYPE}({#FSNAME})]: Space utilization chart (relative to total)'
                     - type: STRING
                       name: reference
@@ -1728,7 +1958,7 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: '{#DEVNAME}: Disk read/write rates'
                     - type: STRING
                       name: reference
@@ -1744,7 +1974,7 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: '{#DEVNAME}: Disk average waiting time'
                     - type: STRING
                       name: reference
@@ -1760,7 +1990,7 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: '{#DEVNAME}: Disk utilization and queue'
                     - type: STRING
                       name: reference
@@ -1776,7 +2006,7 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: 'Interface {#IFNAME}: Network traffic'
                     - type: STRING
                       name: reference
@@ -1789,7 +2019,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: 'Linux: CPU usage'
                     - type: STRING
                       name: reference
@@ -1803,7 +2033,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid.0
                       value:
-                        host: 'Linux by Zabbix agent for PTAF PRO'
+                        host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
                         name: 'Linux: Swap usage'
                     - type: STRING
                       name: reference
@@ -1973,7 +2203,7 @@ zabbix_export:
               newvalue: Up
   triggers:
     - uuid: 173cf92c484248a6a01d7afe8dc70d32
-      expression: 'last(/Linux by Zabbix agent for PTAF PRO/proc.num)/last(/Linux by Zabbix agent for PTAF PRO/kernel.maxproc)*100>80'
+      expression: 'last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num)/last(/PTAF PRO Base Node  Monitoring by Zabbix agent/kernel.maxproc)*100>80'
       name: 'Linux: Getting closer to process limit'
       event_name: 'Linux: Getting closer to process limit (over 80% used)'
       opdata: '{ITEM.LASTVALUE1} active, {ITEM.LASTVALUE2} limit.'
@@ -1982,7 +2212,7 @@ zabbix_export:
         - tag: scope
           value: performance
     - uuid: 1e8ff96248a448eca67e2c5f87804cad
-      expression: 'max(/Linux by Zabbix agent for PTAF PRO/system.swap.size[,pfree],5m)<{$SWAP.PFREE.MIN.WARN} and last(/Linux by Zabbix agent for PTAF PRO/system.swap.size[,total])>0'
+      expression: 'max(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.swap.size[,pfree],5m)<{$SWAP.PFREE.MIN.WARN} and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.swap.size[,total])>0'
       name: 'Linux: High swap space usage'
       event_name: 'Linux: High swap space usage (less than {$SWAP.PFREE.MIN.WARN}% free)'
       opdata: 'Free: {ITEM.LASTVALUE1}, total: {ITEM.LASTVALUE2}'
@@ -1990,14 +2220,14 @@ zabbix_export:
       description: 'If there is no swap configured, this trigger is ignored.'
       dependencies:
         - name: 'Linux: High memory utilization'
-          expression: 'min(/Linux by Zabbix agent for PTAF PRO/vm.memory.utilization,5m)>{$MEMORY.UTIL.MAX}'
+          expression: 'min(/PTAF PRO Base Node  Monitoring by Zabbix agent/vm.memory.utilization,5m)>{$MEMORY.UTIL.MAX}'
         - name: 'Linux: Lack of available memory'
-          expression: 'max(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[available],5m)<{$MEMORY.AVAILABLE.MIN} and last(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[total])>0'
+          expression: 'max(/PTAF PRO Base Node  Monitoring by Zabbix agent/vm.memory.size[available],5m)<{$MEMORY.AVAILABLE.MIN} and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vm.memory.size[total])>0'
       tags:
         - tag: scope
           value: capacity
     - uuid: 63a2010b379e49cd86e16490d88e8039
-      expression: 'max(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[available],5m)<{$MEMORY.AVAILABLE.MIN} and last(/Linux by Zabbix agent for PTAF PRO/vm.memory.size[total])>0'
+      expression: 'max(/PTAF PRO Base Node  Monitoring by Zabbix agent/vm.memory.size[available],5m)<{$MEMORY.AVAILABLE.MIN} and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vm.memory.size[total])>0'
       name: 'Linux: Lack of available memory'
       event_name: 'Linux: Lack of available memory (<{$MEMORY.AVAILABLE.MIN} of {ITEM.VALUE2})'
       opdata: 'Available: {ITEM.LASTVALUE1}, total: {ITEM.LASTVALUE2}'
@@ -2010,9 +2240,9 @@ zabbix_export:
           value: performance
     - uuid: 2176583d672f416d8aa4bc0bf8990b59
       expression: |
-        min(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg1],5m)/last(/Linux by Zabbix agent for PTAF PRO/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}
-        and last(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg5])>0
-        and last(/Linux by Zabbix agent for PTAF PRO/system.cpu.load[all,avg15])>0
+        min(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.cpu.load[all,avg1],5m)/last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}
+        and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.cpu.load[all,avg5])>0
+        and last(/PTAF PRO Base Node  Monitoring by Zabbix agent/system.cpu.load[all,avg15])>0
       name: 'Linux: Load average is too high'
       event_name: 'Linux: Load average is too high (per CPU load over {$LOAD_AVG_PER_CPU.MAX.WARN} for 5m)'
       opdata: 'Load averages(1m 5m 15m): ({ITEM.LASTVALUE1} {ITEM.LASTVALUE3} {ITEM.LASTVALUE4}), # of CPUs: {ITEM.LASTVALUE2}'
@@ -2029,12 +2259,12 @@ zabbix_export:
       graph_items:
         - color: 199C0D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: system.cpu.switches
         - sortorder: '1'
           color: F63100
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: system.cpu.intr
     - uuid: 5204ab18fcb5473bb99d4cb6f6eb34de
       name: 'Linux: CPU usage'
@@ -2044,47 +2274,47 @@ zabbix_export:
       graph_items:
         - color: 199C0D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.util[,system]'
         - sortorder: '1'
           color: F63100
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.util[,user]'
         - sortorder: '2'
           color: 00611C
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.util[,nice]'
         - sortorder: '3'
           color: F7941D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.util[,iowait]'
         - sortorder: '4'
           color: FC6EA3
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.util[,steal]'
         - sortorder: '5'
           color: 6C59DC
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.util[,interrupt]'
         - sortorder: '6'
           color: C7A72D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.util[,softirq]'
         - sortorder: '7'
           color: BA2A5D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.util[,guest]'
         - sortorder: '8'
           color: F230E0
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.util[,guest_nice]'
     - uuid: 695e0b8ad18c4ab7bbd6ab0cc5a013cb
       name: 'Linux: CPU utilization'
@@ -2094,7 +2324,7 @@ zabbix_export:
         - drawtype: GRADIENT_LINE
           color: 199C0D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: system.cpu.util
     - uuid: 789332929232465280a8d721e5af1646
       name: 'Linux: Memory usage'
@@ -2103,13 +2333,13 @@ zabbix_export:
         - drawtype: BOLD_LINE
           color: 199C0D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'vm.memory.size[total]'
         - sortorder: '1'
           drawtype: GRADIENT_LINE
           color: F63100
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'vm.memory.size[available]'
     - uuid: b58783627b334de996801b372cd8ac5a
       name: 'Linux: Memory utilization'
@@ -2119,31 +2349,31 @@ zabbix_export:
         - drawtype: GRADIENT_LINE
           color: 199C0D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: vm.memory.utilization
     - uuid: cc3675837c3a4d3f987739aa715199a2
       name: 'Linux: Processes'
       graph_items:
         - color: 199C0D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: proc.num
         - sortorder: '1'
           color: F63100
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'proc.num[,,run]'
     - uuid: 764e556eed864c86a5e528a2b0faa370
       name: 'Linux: Swap usage'
       graph_items:
         - color: 199C0D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.swap.size[,free]'
         - sortorder: '1'
           color: F63100
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.swap.size[,total]'
     - uuid: dc3e064522224ef3a42f40b3f520940b
       name: 'Linux: System load'
@@ -2151,21 +2381,21 @@ zabbix_export:
       graph_items:
         - color: 199C0D
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.load[all,avg1]'
         - sortorder: '1'
           color: F63100
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.load[all,avg5]'
         - sortorder: '2'
           color: 00611C
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: 'system.cpu.load[all,avg15]'
         - sortorder: '3'
           color: F7941D
           yaxisside: RIGHT
           item:
-            host: 'Linux by Zabbix agent for PTAF PRO'
+            host: 'PTAF PRO Base Node  Monitoring by Zabbix agent'
             key: system.cpu.num
