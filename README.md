@@ -7,28 +7,28 @@
 
 ## Требования
 - Zabbix сервер версии 7.0 и выше (На более старых версиях не проверялось)
-- Активный Zabbix агент на целевых хостах
+- zabbix-agent2 для отслеживания systemd
 
 ## Установка агента
 
 1. Ставим агент
 2. Меняем значения /etc/zabbix/zabbix_agentd.conf
 ```
-Server=
-ServerActive=
-Hostname=
+Server=<ip или FQDN zabbix server>
+ServerActive=<ip или FQDN zabbix server>
+Hostname=<имя host ptaf>
 
 ```
 3. Перезапускаем сервис
 ```
-systemctl restart zabbix-agent
+systemctl restart zabbix-agent2
 ```
 
 
 ## Установка шаблона
 
 1. **Скачайте файл шаблона**  
-   [Название_файла.json]
+   [zbx_template_ptaf_pro_base_node.json]
 
 2. **Импорт шаблона в Zabbix**  
    - Перейдите в `Configuration` → `Templates`  
@@ -45,7 +45,7 @@ systemctl restart zabbix-agent
      - `Host name`: Имя хоста в Zabbix  
      - `Visible name`: Отображаемое имя (опционально)  
      - `Groups`: Выберите группу хоста (например: "Linux servers")  
-     - `Agent interfaces`: Добавьте IP-адрес и порт Zabbix агента (например: `127.0.0.1:10050`)  
+     - `Agent interfaces`: Добавьте IP-адрес и порт Zabbix агента (например: `<IP addres PTAF mgmt>:10050`)  
 
 ## Подключение шаблона к хосту
 
@@ -60,7 +60,7 @@ systemctl restart zabbix-agent
    - Убедитесь, что данные с хоста начали поступать  
 
 # Текущие проблемы:
-- Не работает мониторинг служб через proc.num[] без предоставления root доступа
+- не обнаружено
 
 
 # Hardering:
@@ -78,4 +78,4 @@ systemctl restart zabbix-agent
 Если у вас возникли проблемы:  
 - Оставьте Issue в этом репозитории  
 - Данный шаблон не тестировался на продуктивных средах
-- может перестать работать после обновления с 4.1.7 -> 4.1.8
+- Проверено на версии 4.2.1
