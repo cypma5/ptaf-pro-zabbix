@@ -15,7 +15,7 @@
 ```
 sudo dpkg -i ./zabbix-agent2_1%3a7.0.16-1+debian11_amd64.deb
 ```
-3. Меняем значения /etc/zabbix/zabbix_agentd.conf
+3. Меняем значения /etc/zabbix/zabbix_agent2.conf
 ```
 Server=<ip или FQDN zabbix server>
 ServerActive=<ip или FQDN zabbix server>
