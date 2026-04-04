@@ -175,7 +175,6 @@
                         "name": "PTAF process status border",
                         "key": "proc.num[border]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -202,7 +201,6 @@
                         "name": "PTAF process status clickhouse-server",
                         "key": "proc.num[clickhouse-server,,,/usr/bin/clickhouse-server]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -225,7 +223,6 @@
                         "name": "PTAF process status containerd",
                         "key": "proc.num[containerd]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -248,7 +245,6 @@
                         "name": "PTAF process status etcd",
                         "key": "proc.num[etcd]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -271,7 +267,6 @@
                         "name": "PTAF process status grafana",
                         "key": "proc.num[grafana]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -294,7 +289,6 @@
                         "name": "PTAF process status kubelet",
                         "key": "proc.num[kubelet]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -317,7 +311,6 @@
                         "name": "PTAF process status minio",
                         "key": "proc.num[minio]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -340,7 +333,6 @@
                         "name": "PTAF process status postgres",
                         "key": "proc.num[postgres,,,/usr/lib/postgresql/14/bin/postgres]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -386,7 +378,6 @@
                         "name": "PTAF process status vault",
                         "key": "proc.num[vault]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -409,7 +400,6 @@
                         "name": "PTAF process status wsc-daemon",
                         "key": "proc.num[wsc-daemon]",
                         "trends": "0",
-                        "status": "DISABLED",
                         "tags": [
                             {
                                 "tag": "component",
@@ -472,6 +462,99 @@
                                         "value": "security"
                                     }
                                 ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "e5f34a294e004d2aba4a66825746a9f1",
+                        "name": "Checksum of /opt/ptaf/control_plane_certs_update.sh",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "vfs.file.cksum[/opt/ptaf/control_plane_certs_update.sh,sha256]",
+                        "delay": "15m",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "security"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "5afbe462197741288248c220e054a392",
+                                "expression": "last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.cksum[/opt/ptaf/control_plane_certs_update.sh,sha256],#1)<>last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.cksum[/opt/ptaf/control_plane_certs_update.sh,sha256],#2)",
+                                "name": "Checksum of /opt/ptaf/control_plane_certs_update.sh changed",
+                                "priority": "HIGH"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "e29bf0492c794edc9a8731b4dc4e716c",
+                        "name": "Checksum of /opt/ptaf/retention_controller/retention_controller.py",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "vfs.file.cksum[/opt/ptaf/retention_controller/retention_controller.py,sha256]",
+                        "delay": "15m",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "security"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "e34aa0806fda41b79ec0beb7da261bba",
+                                "expression": "last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.cksum[/opt/ptaf/retention_controller/retention_controller.py,sha256],#1)<>last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.cksum[/opt/ptaf/retention_controller/retention_controller.py,sha256],#2)",
+                                "name": "Checksum of /opt/ptaf/retention_controller/retention_controller.py changed",
+                                "priority": "HIGH"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "28aecfa8e5de4fa5ab082e0ea17f9c11",
+                        "name": "Checksum of /opt/ptaf/retention_controller/retention_controller.sh",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "vfs.file.cksum[/opt/ptaf/retention_controller/retention_controller.sh,sha256]",
+                        "delay": "15m",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "security"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "43a392b5704b46e78adb9c47590f1315",
+                                "expression": "last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.cksum[/opt/ptaf/retention_controller/retention_controller.sh,sha256],#1)<>last(/PTAF PRO Base Node  Monitoring by Zabbix agent/vfs.file.cksum[/opt/ptaf/retention_controller/retention_controller.sh,sha256],#2)",
+                                "name": "Checksum of /opt/ptaf/retention_controller/retention_controller.sh changed",
+                                "priority": "HIGH"
                             }
                         ]
                     },
