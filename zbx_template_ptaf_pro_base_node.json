@@ -128,6 +128,26 @@
                         ]
                     },
                     {
+                        "uuid": "3a8dceaa53284db7bea635a7f3b7f3b5",
+                        "name": "Number of zombie processes",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "proc.num[,,zomb,]",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "7d6eebdc49e24a5d86cb210fa47e489d",
+                                "expression": "last(/PTAF PRO Base Node  Monitoring by Zabbix agent/proc.num[,,zomb,])>0",
+                                "name": "Zombie Process >0",
+                                "priority": "AVERAGE"
+                            }
+                        ]
+                    },
+                    {
                         "uuid": "e43525330c154a858fa54bb727616026",
                         "name": "PTAF process status beam.smp",
                         "key": "proc.num[beam.smp]",
@@ -651,7 +671,7 @@
                     },
                     {
                         "macro": "{$VFS.FS.FSNAME.NOT_MATCHES}",
-                        "value": "vfs.fs.discovery[,\"/\",,\"^(/dev|/sys|/run|/proc|.+/shm$)\"]",
+                        "value": "vfs.fs.discovery[,\"/\",,\"^(/dev|/sys|/run|/proc|.+/shm$|/var/lib/kubelet)\"]",
                         "description": "Used for filesystem discovery. Can be overridden on the host or linked template level."
                     },
                     {
